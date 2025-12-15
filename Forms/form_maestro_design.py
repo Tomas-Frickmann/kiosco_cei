@@ -1,6 +1,7 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import font
-
+from Forms.form_login_out import FormularioLogin 
 from config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral
 import Utilitys.util_ventana as util_ventana
 import Utilitys.util_images as util_img
@@ -43,6 +44,9 @@ class FormularioMaestroDesign(tk.Tk):
         self.edit= util_img.leer_imagen("./Images/edit.png",(60,60))
         self.consulta= util_img.leer_imagen("./Images/consulta.png",(60,60))
         
+        #icono admin
+        self.On = util_img.leer_imagen("./Images/On.png",(20,20))
+        self.Off = util_img.leer_imagen("./Images/Off.png",(20,20))  
 
         #Carga las ventanas
         self.config_window()
@@ -51,8 +55,8 @@ class FormularioMaestroDesign(tk.Tk):
         self.controles_menu_iconos()
         self.controles_menu_lateral()
         self.controles_cuerpo()
-
- 
+        
+        
 
 
     def config_window(self):
@@ -83,44 +87,71 @@ class FormularioMaestroDesign(tk.Tk):
         self.cuerpo_principal.pack(side=tk.RIGHT,fill='both',expand=True)
 
     def controles_barra_superior(self):
+        self.frame_admin = tk.Frame(self.barra_superior,bg=color_barra_superior)
+        self.frame_admin.pack(side=tk.RIGHT,fill='both',expand=False)
+        
+        self.frame_Menu = tk.Frame(self.barra_superior,bg=color_barra_superior)
+        self.frame_Menu.pack(side=tk.LEFT,fill='both',expand=False)
         #Configuracion de la barra superior
         font_awesome =font.Font(family='FontAwesome',size=12)
 
         #boton de menu lateral
         self.MenuIcon= util_img.leer_imagen("./Images/Menu.png",(30,30))
-        self.buttonMenuLateral =tk.Button(self.barra_superior,image=self.MenuIcon,font=font_awesome,command=self.toggle_panel,bd=0, bg=color_barra_superior, fg="white",padx=10,width=60)
+        self.buttonMenuLateral =tk.Button(self.frame_Menu,image=self.MenuIcon,font=font_awesome,command=self.toggle_panel,bd=0, bg=color_barra_superior, fg="white",padx=10,width=60)
         self.buttonMenuLateral.pack(side=tk.LEFT)
 
+        
+        
         #etiqueta de titulo
-        self.labelTitulo = tk.Label(self.barra_superior,text="Menu")
-        self.labelTitulo.config(fg="#fff",font=("Roboto",15),bg=color_barra_superior, pady=5,width=5)
-        self.labelTitulo.pack(side=tk.LEFT)
-        self.frame_admin = tk.Frame(self.barra_superior,bg=color_barra_superior)
-        self.frame_admin.pack(side=tk.RIGHT,fill='both',expand=False)
+        self.label_Menu = tk.Label(self.frame_Menu,text="Menu")
+        self.label_Menu.config(fg="#fff",font=("Roboto",15),bg=color_barra_superior, pady=5,width=5)
+        self.label_Menu.pack(side=tk.LEFT)
+        
+       
         #Etiqueta de informacion
-        self.labelTitulo=tk.Label(self.barra_superior,text="impresiones_cei@fi.mdp.edu.ar")
-        self.labelTitulo.config(fg="#fff",font=("Roboto",10),bg=color_barra_superior,padx=10,width=25)
-        self.labelTitulo.pack(side=tk.RIGHT,fill='both',expand=False)
- 
+        self.label_Mail=tk.Label(self.frame_Menu,text="impresiones_cei@fi.mdp.edu.ar")
+        self.label_Mail.config(fg="#fff",font=("Roboto",10),bg=color_barra_superior,padx=10,width=25)
+        self.label_Mail.pack(side=tk.RIGHT,fill='both',expand=False)
+        
         #Admin on/off
-        self.On = util_img.leer_imagen("./Images/On.png",(20,20))
-        self.Off = util_img.leer_imagen("./Images/Off.png",(20,20))
-        self.frame_on_off = tk.Frame(self.frame_admin,bg=color_barra_superior,padx=5)
-        self.frame_on_off.pack(side=tk.RIGHT,fill='both',expand=False)
-        self.labelAdmin = tk.Label(self.frame_on_off,image=self.Off,bg=color_barra_superior)
-        self.labelAdmin.pack(side=tk.RIGHT)
-        #Etiqueta de Admin
-        self.labelTitulo=tk.Label(self.frame_admin,text="Admin")
-        self.labelTitulo.config(fg="#fff",font=("Roboto",10),bg=color_barra_superior,padx=5)
-        self.labelTitulo.pack(side=tk.RIGHT,fill='both',expand=False)
+        
+        #boton off
+        self.button_on_off =tk.Button(self.frame_admin,image=self.Off,font=font_awesome,command=self.log_in_out,bd=0, bg=color_barra_superior, fg="white",padx=10,width=60)
+        self.button_on_off.pack(side=tk.RIGHT)
+        
+        #texto de modo:
+        
+        self.label_Modo=tk.Label(self.frame_admin,text="Modo: Empleados")
+        self.label_Modo.config(fg="#fff",font=("Roboto",10),bg=color_barra_superior,padx=5)
+        self.label_Modo.pack(side=tk.RIGHT,fill='both',expand=False)
         app_state.add_observer(self.update_admin_icon)
 
-    def update_admin_icon(self):
-        if app_state.is_admin:
-            self.labelAdmin.config(image=self.On)
-        else:
-            self.labelAdmin.config(image=self.Off)
 
+   
+    def log_in_out(self):
+        
+        if app_state.is_admin:
+            app_state.set_admin(False)           
+            messagebox.showinfo("Sesión Cerrada", "Modo empleado activado.")
+        else:
+            FormularioLogin(self)
+            
+
+
+    def update_admin_icon(self):
+        """
+        Se ejecuta automáticamente cuando app_state.set_admin() es llamado
+        (ya sea con True o False).
+        """
+        if app_state.is_admin:
+             self.label_Modo.config(text="Modo: Administrador")
+             self.button_on_off.config(image=self.On)
+        else:
+            self.label_Modo.config(text="Modo: Empleados")
+            self.button_on_off.config(image=self.Off)
+
+
+##logica de botones laterales 
 
     def controles_menu_iconos(self):
         #Configuracion de los iconos
@@ -196,11 +227,11 @@ class FormularioMaestroDesign(tk.Tk):
     def bind_hover_events(self,button):
         #Asociar eventos Enter y Leave con la funcion dinamica
         button.bind("<Enter>", lambda event: self.on_enter(event, button))
-        button.bind("<Enter>", lambda event: self.on_leave(event, button))
+        button.bind("<Leave>", lambda event: self.on_leave(event, button))
     
     def on_enter(self,event,button):
         #cambiar el estilo al pasar el raton por encima
-        button.config(bg=color_menu_cursor_encima, fg='blue')
+        button.config(bg=color_menu_cursor_encima, fg="black")
 
     def on_leave(self,event,button):
         #Restaurar estilo al salir el raton
