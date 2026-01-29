@@ -25,6 +25,7 @@ class PanelEmpleados():
         self.hora_entrada_extra = []
         self.motivo_extra = []
         self.root = root
+        
         #Iconos para panel empleados
         self.agregar=add
         self.delete=delete
@@ -58,28 +59,34 @@ class PanelEmpleados():
 
         borde_sup_sup=tk.Frame(panel_derecho,background=color_barra_superior)
         borde_sup_sup.pack(side=tk.TOP,fill='both',expand=False)
+        
         label_sup_sup=tk.Label(borde_sup_sup,text="Empleados",font=("Roboto",15),bg=color_barra_superior,fg="white")
-        label_sup_sup.pack(side=tk.LEFT,fill='both',expand=False)
+        label_sup_sup.pack(side=tk.TOP,fill='both',expand=False)
+        
         #Bordes del panel izquierdo
         borde_der_sup=tk.Frame(panel_derecho,bg=color_menu_lateral,height=20)
         borde_der_sup.pack(side=tk.TOP,fill='both',expand=False)
+        
         borde_der_inf=tk.Frame(panel_derecho,bg=color_menu_lateral,height=20)
         borde_der_inf.pack(side=tk.BOTTOM,fill='both',expand=False)
+        
         borde_der_der=tk.Frame(panel_derecho,bg=color_menu_lateral,width=20)
         borde_der_der.pack(side=tk.RIGHT,fill='both',expand=False)
+        
         borde_der_izq=tk.Frame(panel_derecho,bg=color_menu_lateral,width=20)
         borde_der_izq.pack(side=tk.LEFT,fill='both',expand=True)
+        
+        #Nueva tabla de empleados
         Frame_empleados = tk.Frame(panel_derecho,bg=color_menu_lateral)
         Frame_empleados.pack(side=tk.TOP,fill='both',expand=False)
 
-        #Nueva tabla de empleados
         self.frame_nombre=tk.Frame(Frame_empleados,bg=color_menu_lateral,padx=5,pady=2)
         self.frame_nombre.pack(side=tk.LEFT)
         self.frame_dni=tk.Frame(Frame_empleados,bg=color_menu_lateral,padx=5,pady=2)
         self.frame_dni.pack(side=tk.LEFT)
 
         #Lista de Empleados
-        label_empleados=tk.Label(self.frame_dni,text="Empleados",font=('Calibri', 12),bg=color_barra_superior,fg="white",width=20)
+        label_empleados=tk.Label(self.frame_dni,text="Empleado",font=('Calibri', 12),bg=color_barra_superior,fg="white",width=20)
         label_empleados.grid(row=0,padx=5,pady=5,sticky="nsew")
 
         #Lista de los Dni
