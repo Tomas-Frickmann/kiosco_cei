@@ -9,14 +9,14 @@ from tkinter import PhotoImage
 from tkinter import filedialog
 from tkcalendar import Calendar
 import Datos.Connect as db
-from Forms.form_setting import app_state
-from Forms.form_setting import cargar_configuracion
-from config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos_turquesa_oscuro,color_fondo_gris
 
-class PanelStore():
+from modelos.main_model import MainModel, carg
+from Utilitys.util_config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos_turquesa_oscuro,color_fondo_gris
+
+class StoreView():
     
-    def __init__(self, panel_principal,lista_ventas):
-        self.nombre_maquina = cargar_configuracion().get("nombre_maquina", "SIN_NOMBRE")
+    def __init__(self, panel_principal,model: MainModel):
+        self.nombre_maquina = model.cargar_configuracion().get("nombre_maquina", "SIN_NOMBRE")
         #Estilo
         self.style = ttk.Style()
         self.style.theme_use('clam')
@@ -36,7 +36,7 @@ class PanelStore():
 
         self.subcuerpo = tk.Frame(panel_principal, bg=color_barra_superior)
         self.subcuerpo.pack(side=tk.TOP, fill='both', expand=True)
-        self.lista_ventas = lista_ventas  # Lista para almacenar los productos agregados
+        self.lista_ventas = model.ventas_global  # Lista para almacenar los productos agregados
 
         self.frame_encabezado = tk.Frame(self.subcuerpo, bg=color_barra_superior)
         self.frame_encabezado.pack(side=tk.TOP, fill='x', expand=False,anchor='n')

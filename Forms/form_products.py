@@ -5,8 +5,8 @@ from tkinter import messagebox
 from tkinter import PhotoImage
 from tkinter import filedialog
 import Datos.Connect as db
-from Forms.form_setting import app_state
-from config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos_turquesa_oscuro,color_fondo_gris
+
+from Utilitys.util_config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos_turquesa_oscuro,color_fondo_gris
 
 class PanelProducts():
 

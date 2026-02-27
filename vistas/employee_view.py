@@ -8,14 +8,15 @@ import time
 from datetime import datetime,timedelta
 from tkinter import messagebox
 import Datos.Connect as db
-from config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos2
-from Forms.form_setting import Setting, app_state
-
+from Utilitys.util_config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos2
+# from vistas.setting_view import  app_state
+from Utilitys.util_gestorimagenes import GestorImagenes as gi
+from controladores.employee_controller import EmployeeController
 
 class PanelEmpleados():
 
-    def __init__(self,root,panel_principal,add,delete,edit,consulta):
-
+    def __init__(self,panel_principal,controlador: EmployeeController):
+        
         #Variables iniciales
         self.empleados_activos = []
         self.empleados_activos_extra = []
@@ -24,25 +25,28 @@ class PanelEmpleados():
         self.hora_entrada = []
         self.hora_entrada_extra = []
         self.motivo_extra = []
-        self.root = root
-        
+        self.controlador = controlador
+       
         #Iconos para panel empleados
-        self.agregar=add
-        self.delete=delete
-        self.edit=edit
-        self.consulta=consulta
-        #Paneles
+        self.agregar= gi.obtener_imagen("add","./Images/add.png",(60,60))
+        self.delete=gi.obtener_imagen("delete","./Images/Erase.png",(60,60))
+        self.edit=gi.obtener_imagen("edit","./Images/edit.png",(60,60))
+        self.consulta=gi.obtener_imagen("consulta","./Images/consulta.png",(60,60))
+        
+        """El orden importa ya que estamos utilizando tkinker"""
         self.PanelDerecho(panel_principal)
         self.PanelFichaje(panel_principal)
         self.PanelExtra(panel_principal)
         self.PanelEmpleados(panel_principal)
 
         # Cargar empleados activos desde la base de datos
-        self.cargar_empleados_activos()
+        self.controlador.cargar_empleados_activos()
+       
 
     def crear_boton_empleado(self, parent, text, image, command):
         frame = tk.Frame(parent, bg=color_barra_superior)
-        frame.pack(side=tk.LEFT, fill='both', expand=False)
+        frame.pack(side=tk.LEFT, fill='both', expand=False) 
+        
         button = tk.Button(frame, text=text, font=('Calibri', 12), bg=color_barra_superior, fg="white", command=command)
         button.pack(side=tk.BOTTOM, fill='both', expand=False, padx=5, pady=5)
         label = tk.Label(frame, image=image, bg=color_barra_superior)
@@ -96,7 +100,7 @@ class PanelEmpleados():
         self.TablaEmpleados(self.frame_nombre, self.frame_dni,"nombre")
 
     def TablaEmpleados(self,frame1,frame2,orden,edicion=False,frame3=None,frame4=None):
-        empleados= db.GetEmpleados(self)
+        empleados= self.controlador.getEmpleados()
         if orden == "dni":
             empleados.sort(key=lambda x: x[0]) # Ordenar por DNI (segundo elemento de la tupla)
         elif orden == "nombre":
@@ -128,89 +132,110 @@ class PanelEmpleados():
             label_nombre = tk.Label(frame2, text=nombre, font=('Calibri', 12),  anchor="center", background=color_cuerpo_principal)
             label_nombre.grid(row=i+1, column=0, sticky="nsew", padx=5, pady=2)
             if edicion:
-                label_nombre.bind("<Button-1>", lambda e, n=nombre, d=dni: self.editar_empleado(n, d))
+                label_nombre.bind("<Button-1>", lambda e, n=nombre, d=dni: self.controlador.editar_empleado(n, d))
 
             if frame3:
                 boton_editar = tk.Button(frame3, text="Editar", font=('Calibri', 12), bg='#6D8299', fg='white',
-                                        command=lambda n=nombre, d=dni: self.editar_empleado(n, d))
+                                        command=lambda n=nombre, d=dni: self.controlador.editar_empleado(n, d))
                 boton_editar.grid(row=i+1, column=0, sticky="nsew",padx=5, pady=2)
                 boton_eliminar = tk.Button(frame4, text="Eliminar", font=('Calibri', 12), bg='#FF6B6B', fg='white',
-                                        command=lambda d=dni,n=nombre: self.confirmar_eliminacion(n, d))
+                                        command=lambda d=dni,n=nombre: self.controlador.eliminar_empleado(n, d))
                 boton_eliminar.grid(row=i+1, column=0, sticky="nsew",padx=5, pady=2)
 
 #Paneles de fichaje
-    def PanelFichaje(self,panel_principal):
-        #Titulo para fichaje
-        borde_sup_sup=tk.Frame(panel_principal,background=color_barra_superior)
-        borde_sup_sup.pack(side=tk.TOP,fill='both',expand=False)
-        label_sup_sup=tk.Label(borde_sup_sup,text="Panel Fichajes",font=("Roboto",15),bg=color_barra_superior,fg="white")
-        label_sup_sup.pack(side=tk.LEFT,fill='both',expand=False)
+    def PanelFichaje(self, panel_principal):
+        # --- 1. TITULO (Se mantiene igual) ---
+        borde_sup_sup = tk.Frame(panel_principal, background=color_barra_superior)
+        borde_sup_sup.pack(side=tk.TOP, fill='x', expand=False)
+        label_sup_sup = tk.Label(borde_sup_sup, text="Panel Fichajes", font=("Roboto", 15), bg=color_barra_superior, fg="white")
+        label_sup_sup.pack(side=tk.LEFT, fill='both', expand=False)
 
-        #Modulo para fichaje
-        fichaje = tk.Frame(panel_principal,background=color_menu_lateral)
-        fichaje.pack(side=tk.TOP, fill='both',expand=True)
-        #Bordes para fichaje
-        borde_fichaje_sup=tk.Frame(fichaje,bg=color_menu_lateral,height=20)
-        borde_fichaje_sup.pack(side=tk.TOP,fill='both',expand=False)
-        borde_fichaje_inf=tk.Frame(fichaje,bg=color_menu_lateral,height=20)
-        borde_fichaje_inf.pack(side=tk.BOTTOM,fill='both',expand=False)
-        borde_fichaje_izq=tk.Frame(fichaje,bg=color_menu_lateral,width=20)
-        borde_fichaje_izq.pack(side=tk.LEFT,fill='both',expand=False)
-        borde_fichaje_der=tk.Frame(fichaje,bg=color_menu_lateral,width=20)
-        borde_fichaje_der.pack(side=tk.RIGHT,fill='both',expand=False)
+        # --- 2. EL "ENVOLTORIO" DEL SCROLL ---
+        contenedor_canvas = tk.Frame(panel_principal, bg=color_menu_lateral)
+        contenedor_canvas.pack(side=tk.TOP, fill='both', expand=True)
 
-        #Modulo para entrar Dni
-        frame_Dni=tk.Frame(fichaje,bg=color_menu_lateral)
-        frame_Dni.pack(side=tk.LEFT, fill='both',expand=False)
+        canvas = tk.Canvas(contenedor_canvas, bg=color_menu_lateral, highlightthickness=0)
+        # Cambiamos a horizontal como querías
+        scrollbar = tk.Scrollbar(contenedor_canvas, orient="horizontal", command=canvas.xview)
+        canvas.configure(xscrollcommand=scrollbar.set)
 
-        #Entrada de Dni
-        label_Dni = tk.Label(frame_Dni, text="Ingrese DNI",font=('Calibri', 12), bg=color_barra_superior,fg="white", width=20)
-        label_Dni.pack(side=tk.TOP,fill='both',expand=False,padx=5,pady=5)
-        entry_Dni = tk.Entry(frame_Dni,font=('Calibri', 12),bg=color_cuerpo_principal,fg="black")
-        entry_Dni.pack(side=tk.TOP,fill='both',expand=False,padx=5,pady=5)
-        entry_Dni.bind("<Return>", lambda event: self.manejar_dni(entry_Dni))
+        scrollbar.pack(side=tk.BOTTOM, fill='x')
+        canvas.pack(side=tk.LEFT, fill='both', expand=True)
 
-        #Modulo para ver los activos
-        self.frame_fichados=tk.Frame(fichaje,bg=color_menu_lateral)
-        self.frame_fichados.pack(side=tk.LEFT, fill='both',expand=False,padx=10)
-        self.frame_horas_fichados=tk.Frame(fichaje,bg=color_menu_lateral)
-        self.frame_horas_fichados.pack(side=tk.LEFT, fill='both',expand=False,padx=10)
+        # Este es el frame que contendrá todo tu código original
+        fichaje_interno = tk.Frame(canvas, background=color_menu_lateral)
+        canvas.create_window((0, 0), window=fichaje_interno, anchor="nw")
 
-        #Lista de empleados activos
-        label_empleados_activos=tk.Label(self.frame_fichados,text="Empleados activos",font=('Calibri', 12),bg=color_barra_superior,fg="white",width=20)
-        label_empleados_activos.grid(row=0,padx=5,pady=5)
+      
+        
+        # Bordes
+        tk.Frame(fichaje_interno, bg=color_menu_lateral, height=20).pack(side=tk.TOP, fill='both', expand=False)
+        tk.Frame(fichaje_interno, bg=color_menu_lateral, height=20).pack(side=tk.BOTTOM, fill='both', expand=False)
+        tk.Frame(fichaje_interno, bg=color_menu_lateral, width=20).pack(side=tk.LEFT, fill='both', expand=False)
+        tk.Frame(fichaje_interno, bg=color_menu_lateral, width=20).pack(side=tk.RIGHT, fill='both', expand=False)
 
-        #Lista de las horas de los empleados activos
-        label_horas_activas=tk.Label(self.frame_horas_fichados,text="Tiempo en Actividad",font=('Calibri', 12),bg=color_barra_superior,fg="white",width=20)
-        label_horas_activas.grid(row=0,padx=5,pady=5)
+        # Modulo DNI
+        frame_Dni = tk.Frame(fichaje_interno, bg=color_menu_lateral)
+        frame_Dni.pack(side=tk.LEFT, fill='both', expand=False)
 
-        boton_fichar = tk.Button(frame_Dni, text="Ingreso", font=('Calibri', 12), command=lambda: self.manejar_dni(entry_Dni), bg='#6D8299', fg='white')
-        boton_fichar.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
-        separador1=tk.Frame(fichaje,bg=color_menu_lateral,width=20)
-        separador1.pack(side=tk.LEFT,fill='both',expand=False)
+        label_Dni = tk.Label(frame_Dni, text="Ingrese DNI", font=('Calibri', 12), bg=color_barra_superior, fg="white", width=20)
+        label_Dni.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+        entry_Dni = tk.Entry(frame_Dni, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black")
+        entry_Dni.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+        entry_Dni.bind("<Return>", lambda event: self.controlador.manejar_dni(entry_Dni))
+
+        # Modulo Activos
+        self.frame_fichados = tk.Frame(fichaje_interno, bg=color_menu_lateral)
+        self.frame_fichados.pack(side=tk.LEFT, fill='both', expand=False, padx=10)
+        self.frame_horas_fichados = tk.Frame(fichaje_interno, bg=color_menu_lateral)
+        self.frame_horas_fichados.pack(side=tk.LEFT, fill='both', expand=False, padx=10)
+
+        tk.Label(self.frame_fichados, text="Empleados activos", font=('Calibri', 12), bg=color_barra_superior, fg="white", width=20).grid(row=0, padx=5, pady=5)
+        tk.Label(self.frame_horas_fichados, text="Tiempo en Actividad", font=('Calibri', 12), bg=color_barra_superior, fg="white", width=20).grid(row=0, padx=5, pady=5)
+
+        tk.Button(frame_Dni, text="Ingreso", font=('Calibri', 12), command=lambda: self.controlador.manejar_dni(entry_Dni), bg='#6D8299', fg='white').pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+        
+        tk.Frame(fichaje_interno, bg=color_menu_lateral, width=20).pack(side=tk.LEFT, fill='both', expand=False)
+        self.actualizar_lista_activos()
+        # --- 4. CIERRE DEL SCROLL (Para que sepa cuánto medir) ---
+        fichaje_interno.update_idletasks()
+        canvas.config(scrollregion=canvas.bbox("all"))
 
     def PanelExtra(self,panel_principal):
+        
+        
+       
         #Titulo para fichaje
         borde_sup_sup=tk.Frame(panel_principal,background=color_barra_superior)
         borde_sup_sup.pack(side=tk.TOP,fill='both',expand=False)
         label_sup_sup=tk.Label(borde_sup_sup,text="Panel Extra",font=("Roboto",15),bg=color_barra_superior,fg="white")
         label_sup_sup.pack(side=tk.LEFT,fill='both',expand=False)
 
-        #Modulo para fichaje
-        fichaje = tk.Frame(panel_principal,background=color_menu_lateral)
-        fichaje.pack(side=tk.TOP, fill='both',expand=True)
+        contenedor_canvas = tk.Frame(panel_principal, bg=color_menu_lateral)
+        contenedor_canvas.pack(side=tk.TOP, fill='both', expand=True)
+
+        canvas = tk.Canvas(contenedor_canvas, bg=color_menu_lateral, highlightthickness=0)
+        scrollbar = tk.Scrollbar(contenedor_canvas, orient="horizontal", command=canvas.xview)
+        canvas.configure(xscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.BOTTOM, fill='x')
+        canvas.pack(side=tk.LEFT, fill='both', expand=True)
+       
+        fichaje_interno_extra = tk.Frame(canvas, background=color_menu_lateral)
+        canvas.create_window((0, 0), window=fichaje_interno_extra, anchor="nw")
+        
+       
         #Bordes para fichaje
-        borde_fichaje_sup=tk.Frame(fichaje,bg=color_menu_lateral,height=20)
+        borde_fichaje_sup=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral,height=20)
         borde_fichaje_sup.pack(side=tk.TOP,fill='both',expand=False)
-        borde_fichaje_inf=tk.Frame(fichaje,bg=color_menu_lateral,height=20)
+        borde_fichaje_inf=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral,height=20)
         borde_fichaje_inf.pack(side=tk.BOTTOM,fill='both',expand=False)
-        borde_fichaje_izq=tk.Frame(fichaje,bg=color_menu_lateral,width=20)
+        borde_fichaje_izq=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral,width=20)
         borde_fichaje_izq.pack(side=tk.LEFT,fill='both',expand=False)
-        borde_fichaje_der=tk.Frame(fichaje,bg=color_menu_lateral,width=20)
+        borde_fichaje_der=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral,width=20)
         borde_fichaje_der.pack(side=tk.RIGHT,fill='both',expand=False)
 
         #Modulo para entrar Dni
-        frame_Dni=tk.Frame(fichaje,bg=color_menu_lateral)
+        frame_Dni=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral)
         frame_Dni.pack(side=tk.LEFT, fill='both',expand=False)
 
         #Entrada de Dni
@@ -218,19 +243,19 @@ class PanelEmpleados():
         label_Dni.pack(side=tk.TOP,fill='both',expand=False,padx=5,pady=5)
         entry_Dni_extra = tk.Entry(frame_Dni,font=('Calibri', 12),bg=color_cuerpo_principal,fg="black")
         entry_Dni_extra.pack(side=tk.TOP,fill='both',expand=False,padx=5,pady=5)
-        entry_Dni_extra.bind("<Return>", lambda event: self.manejar_dni(entry_Dni_extra,1))
+        entry_Dni_extra.bind("<Return>", lambda event: self.controlador.manejar_dni(entry_Dni_extra,1))
         label_motivo = tk.Label(frame_Dni, text="Motivo:",font=('Calibri', 12), bg=color_barra_superior,fg="white", width=20)
         label_motivo.pack(side=tk.TOP,fill='both',expand=False,padx=5,pady=5)
         entry_motivo = tk.Entry(frame_Dni,font=('Calibri', 12),bg=color_cuerpo_principal,fg="black")
         entry_motivo.pack(side=tk.TOP,fill='both',expand=False,padx=5,pady=5)
-        entry_motivo.bind("<Return>", lambda event: [self.manejar_dni(entry_Dni_extra, 1, entry_motivo.get()), entry_motivo.delete(0, tk.END)])
+        entry_motivo.bind("<Return>", lambda event: [self.controlador.manejar_dni(entry_Dni_extra, 1, entry_motivo.get()), entry_motivo.delete(0, tk.END)])
 
         #Modulo para ver los activos
-        self.frame_fichados_extra=tk.Frame(fichaje,bg=color_menu_lateral)
+        self.frame_fichados_extra=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral)
         self.frame_fichados_extra.pack(side=tk.LEFT, fill='both',expand=False,padx=10)
-        self.frame_motivos=tk.Frame(fichaje,bg=color_menu_lateral)
+        self.frame_motivos=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral)
         self.frame_motivos.pack(side=tk.LEFT, fill='both',expand=False,padx=10)
-        self.frame_horas_fichados_extra=tk.Frame(fichaje,bg=color_menu_lateral)
+        self.frame_horas_fichados_extra=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral)
         self.frame_horas_fichados_extra.pack(side=tk.LEFT, fill='both',expand=False,padx=10)
 
 
@@ -247,92 +272,15 @@ class PanelEmpleados():
 
         boton_fichar = tk.Button(frame_Dni, text="Ingreso", font=('Calibri', 12), command=lambda: self.manejar_dni(entry_Dni_extra,1,entry_motivo.get()), bg='#D77F09', fg='white')
         boton_fichar.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
-        separador1=tk.Frame(fichaje,bg=color_menu_lateral,width=20)
+        separador1=tk.Frame(fichaje_interno_extra,bg=color_menu_lateral,width=20)
         separador1.pack(side=tk.LEFT,fill='both',expand=False)
 
         self.actualizar_lista_activos()
+        # --- 4. CIERRE DEL SCROLL (Para que sepa cuánto medir) ---
+        fichaje_interno_extra.update_idletasks()
+        canvas.config(scrollregion=canvas.bbox("all"))
 
-    def manejar_dni(self, entry_Dni,extra=0,motivo=None):
-        dni=entry_Dni.get().strip()
-        # Verificar si el DNI es válido
-        if not dni.isdigit():
-            messagebox.showerror("Error", "El DNI debe ser un número")
-            return
-
-        query = "SELECT nombre FROM empleados WHERE dni = ?"
-        params = (dni,)
-        result = db.execute_query("Datos/datos.db", query, params, fetch=True)
-
-        if not result:
-            messagebox.showerror("Error", "DNI no encontrado en la base de datos")
-            return
-
-        nombre = result[0][0]
-        if extra!=1:
-            # Verificar si el empleado ya está activo
-            if nombre in self.empleados_activos:
-                # Registrar salida
-                self.registrar_salida(dni)
-
-                #Verificar si el nombre está en la lista antes de eliminar
-                if nombre in self.empleados_activos:
-                    index = self.empleados_activos.index(nombre)
-                    self.empleados_activos.pop(index)
-                    self.tiempo_activo.pop(index)  # Eliminar el tiempo correspondiente
-                    self.hora_entrada.pop(index)  # Eliminar la hora de entrada correspondiente
-                else:
-                    messagebox.showerror("Error", f"El empleado {nombre} no está en la lista de activos.")
-            else:
-                # Registrar entrada
-                if len(self.empleados_activos) < 2:
-                    exito = self.registrar_entrada(dni,extra=0, motivo=None)
-                    if exito:
-                        self.empleados_activos.append(nombre)
-                        self.tiempo_activo.append("00:00")  # Inicializar el tiempo activo
-                        self.hora_entrada.append(datetime.now().strftime("%H:%M:%S"))  # Guardar la hora de entrada
-                        self.actualizar_tiempo_activo()
-                else:
-                    messagebox.showerror("Error", "Máximo 2 empleados activos")
-                    return
-        else:
-            if nombre in self.empleados_activos_extra:
-                # Registrar salida (No pedir motivo)
-                self.registrar_salida(dni)
-
-                #Verificar si el nombre está en la lista antes de eliminar
-                if nombre in self.empleados_activos_extra:
-                    index = self.empleados_activos_extra.index(nombre)
-                    self.empleados_activos_extra.pop(index)
-                    self.tiempo_activo_extra.pop(index)  # Eliminar el tiempo correspondiente
-                    self.hora_entrada_extra.pop(index)  # Eliminar la hora de entrada correspondiente
-                    self.motivo_extra.pop(index)  # Eliminar el motivo correspondiente
-                else:
-                    messagebox.showerror("Error", f"El empleado {nombre} no está en la lista de activos.")
-
-            else:
-                # Registrar entrada
-                if not motivo or motivo.strip() == "":
-                    messagebox.showerror("Error", "Debe ingresar un motivo para el fichaje extra")
-                    return
-                if len(motivo) > 50:
-                    messagebox.showerror("Error", "El motivo no puede tener más de 50 caracteres.")
-                    return
-                if len(self.empleados_activos_extra) < 2:
-                    exito = self.registrar_entrada(dni,extra=True,motivo=motivo)
-                    if exito:
-                        self.empleados_activos_extra.append(nombre)
-                        self.tiempo_activo_extra.append("00:00")  # Inicializar el tiempo activo
-                        self.hora_entrada_extra.append(datetime.now().strftime("%H:%M:%S"))  # Guardar la hora de entrada
-                        self.motivo_extra.append(motivo)  # Guardar el motivo
-                        self.actualizar_tiempo_activo()
-                else:
-                    messagebox.showerror("Error", "Máximo 2 empleados activos")
-                    return
-        
-        self.actualizar_lista_activos()
-        
-        entry_Dni.delete(0, tk.END)  # Limpiar el campo de entrada
-
+    
     def actualizar_lista_activos(self):
         # Verificar si los frames aún existen
         if not self.frame_fichados.winfo_exists() or not self.frame_horas_fichados.winfo_exists():
@@ -376,125 +324,7 @@ class PanelEmpleados():
             label = tk.Label(self.frame_horas_fichados_extra, text=tiempo, font=('Calibri', 12), width=20, anchor="center", background=color_cuerpo_principal)
             label.grid(row=i+1, column=0, sticky="nsew", padx=5, pady=5)
 
-    def actualizar_tiempo_activo(self):
-        # Verificar si la ventana principal aún existe
-        if not self.root.winfo_exists():
-            return  # Salir si la ventana principal ya no existe
-        # Actualizar el tiempo activo para cada empleado
-        for i, empleado in enumerate(self.empleados_activos):
-            # Calcular el tiempo transcurrido desde la hora de entrada
-            formato_hora = "%H:%M:%S"
-            hora_actual = datetime.now().strftime(formato_hora)
-            tiempo_transcurrido = (
-                datetime.strptime(hora_actual, formato_hora) - datetime.strptime(self.hora_entrada[i], formato_hora)
-            )
-            # Convertir el tiempo transcurrido a formato HH:MM
-            horas, minutos = divmod(tiempo_transcurrido.seconds // 60, 60)
-            self.tiempo_activo[i] = f"{horas:02}:{minutos:02}"
-            if tiempo_transcurrido.total_seconds() > 14*3600:
-                # Registrar la expulsión en la base de datos
-                query = "SELECT dni FROM empleados WHERE nombre = ?"
-                dni = db.execute_query("Datos/datos.db", query, (empleado,), fetch=True)  # Función para obtener el DNI del empleado
-                self.registrar_salida(dni,forced=True)
-                self.cargar_empleados_activos()
-
-        # Actualizar el tiempo activo para cada empleado extra
-        for i, empleado in enumerate(self.empleados_activos_extra):
-            # Calcular el tiempo transcurrido desde la hora de entrada
-            formato_hora = "%H:%M:%S"
-            hora_actual = datetime.now().strftime(formato_hora)
-            tiempo_transcurrido = (
-                datetime.strptime(hora_actual, formato_hora) - datetime.strptime(self.hora_entrada_extra[i], formato_hora)
-            )
-            # Convertir el tiempo transcurrido a formato HH:MM
-            horas, minutos = divmod(tiempo_transcurrido.seconds // 60, 60)
-            self.tiempo_activo_extra[i] = f"{horas:02}:{minutos:02}"
-            if tiempo_transcurrido.total_seconds() > 14*3600:
-                # Registrar la expulsión en la base de datos
-                query = "SELECT dni FROM empleados WHERE nombre = ?"
-                dni = db.execute_query("Datos/datos.db", query, (empleado,), fetch=True)  # Función para obtener el DNI del empleado
-                self.registrar_salida(dni,forced=True)
-                self.cargar_empleados_activos()
-
-        # Actualizar la interfaz
-        self.actualizar_lista_activos()
-
-        # Llamar a esta función nuevamente después de 60 segundos
-        self.root.after(60000, lambda: self.actualizar_tiempo_activo())
-        
-    def cargar_empleados_activos(self):
-        # Consulta para obtener empleados sin hora de salida
-        query = "SELECT dni, nombre,fecha, hora_entrada FROM registros WHERE hora_salida IS NULL AND motivo IS NULL "
-        empleados_sin_salida = db.execute_query("Datos/datos.db", query, fetch=True)
-
-        query_extra = "SELECT dni, nombre,fecha, hora_entrada, motivo FROM registros WHERE hora_salida IS NULL AND motivo IS NOT NULL "
-        empleados_sin_salida_extra = db.execute_query("Datos/datos.db", query_extra, fetch=True)
-        # Limpiar las listas globales
-        self.empleados_activos.clear()
-        self.empleados_activos_extra.clear()
-        self.tiempo_activo.clear()
-        self.tiempo_activo_extra.clear()
-        self.hora_entrada.clear()
-        self.hora_entrada_extra.clear()
-        self.motivo_extra.clear()
-
-        # Reconstruir las listas
-        for registro in empleados_sin_salida:
-            dni, nombre,fecha_db, hora_entrada_db = registro
-            self.empleados_activos.append(nombre)
-            self.hora_entrada.append(hora_entrada_db)
-
-            # Calcular el tiempo activo desde la hora de entrada
-            formato_fecha = "%Y-%m-%d"
-            formato_hora = "%H:%M:%S"
-            entrada_completa = datetime.combine(
-            datetime.strptime(fecha_db, formato_fecha).date(),
-            datetime.strptime(hora_entrada_db, formato_hora).time())
-            hora_actual = datetime.now()
-            tiempo_transcurrido = hora_actual - entrada_completa
-            horas, minutos = divmod(tiempo_transcurrido.seconds // 60, 60)
-            self.tiempo_activo.append(f"{horas:02}:{minutos:02}")
-
-            # Verificar si el tiempo supera las 14 horas
-            if tiempo_transcurrido.total_seconds() > 14*3600:
-                # Registrar la expulsión en la base de datos
-                query = "SELECT dni FROM empleados WHERE nombre = ?"
-                dni = db.execute_query("Datos/datos.db", query, (nombre,), fetch=True)  # Función para obtener el DNI del empleado
-                self.registrar_salida(dni,forced=True)
-                self.cargar_empleados_activos()
-
-        for registro in empleados_sin_salida_extra:
-            dni, nombre,fecha_db, hora_entrada_db, motivo_db = registro
-            self.empleados_activos_extra.append(nombre)
-            self.hora_entrada_extra.append(hora_entrada_db)
-            self.motivo_extra.append(motivo_db)
-
-            # Calcular el tiempo activo desde la hora de entrada
-            formato_fecha = "%Y-%m-%d"
-            formato_hora = "%H:%M:%S"
-            entrada_completa = datetime.combine(
-            datetime.strptime(fecha_db, formato_fecha).date(),
-            datetime.strptime(hora_entrada_db, formato_hora).time())
-            hora_actual = datetime.now()
-            tiempo_transcurrido = hora_actual - entrada_completa
-            horas, minutos = divmod(tiempo_transcurrido.seconds // 60, 60)
-            self.tiempo_activo_extra.append(f"{horas:02}:{minutos:02}")
-
-            # Verificar si el tiempo supera las 14 horas
-            if tiempo_transcurrido.total_seconds() > 14*3600:
-                # Registrar la expulsión en la base de datos
-                query = "SELECT dni FROM empleados WHERE nombre = ?"
-                dni = db.execute_query("Datos/datos.db", query, (nombre,), fetch=True)
-                self.registrar_salida(dni,forced=True)
-                self.cargar_empleados_activos()
-        
-
-        # Actualizar las listas en la interfaz
-        self.actualizar_lista_activos()
-
-        # Iniciar el cronómetro para actualizar los tiempos activos
-        self.actualizar_tiempo_activo()
-
+    
     def PanelEmpleados(self,panel_principal):
         #Modulo para empleados
         Frame_empleados = tk.Frame(panel_principal,bg=color_menu_lateral)
@@ -523,7 +353,7 @@ class PanelEmpleados():
         relleno_inf.pack(side=tk.BOTTOM,fill='both',expand=True)
 
         #boton add empleado
-        self.crear_boton_empleado(botones, "Agregar\nEmpleado", self.agregar, lambda: self.agregar_empleado()) 
+        self.crear_boton_empleado(botones, "Agregar\nEmpleado", self.agregar, lambda: self.add_employee()) 
         #boton EDITAR empleado
         self.crear_boton_empleado(botones, "Editar\nEmpleado", self.edit, lambda: self.abrir_ventana("Empleados"))
         #boton Borrar empleado
@@ -601,7 +431,7 @@ class PanelEmpleados():
             messagebox.showerror("Error", "No tienes permiso para acceder a esta función.")
 
 #ENTRADA Y EDICION DE EMPLEADOS
-    def agregar_empleado(self):
+    def view_add_employee(self):
         if app_state.is_admin:
             # Crear una nueva ventana para agregar empleado
             nueva_ventana = tk.Toplevel(self.root, bg=color_menu_lateral)
@@ -676,7 +506,7 @@ class PanelEmpleados():
             fg='white')
         boton_cancelar.pack(pady=10)
 
-    def confirmar_eliminacion(self, nombre, dni):
+    def eliminar_empleado(self, nombre, dni):
         print(f"Intentando eliminar: {nombre} con DNI {dni}")
         respuesta = messagebox.askyesno("Confirmación", f"¿Estás seguro de que deseas eliminar al empleado {nombre} con DNI {dni}?")
         print(f"Respuesta del usuario: {respuesta}")

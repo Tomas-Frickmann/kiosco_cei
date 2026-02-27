@@ -20,7 +20,7 @@ def execute_query(db_path,query, params=(), fetch=False):
         
         if fetch:
             result = cursor.fetchall()
-        else:
+        else: 
             result = None
 
         conn.commit()
