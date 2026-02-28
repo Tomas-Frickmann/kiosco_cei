@@ -3,9 +3,15 @@ from pyexpat import model
 import re
 import tkinter as tk
 from modelos.main_model import MainModel
+"""!!!!!!!!!!!"""
 from vistas.employee_view import PanelEmpleados
+"""!!!!!!!!!!!"""
 from Datos import Connect as db
 from Utilitys.util_config import *
+
+#Faltaban
+import time
+from tkinter import messagebox
 
 class EmployeeController:
     def __init__(self,root, main_body, model :MainModel):
@@ -219,12 +225,9 @@ class EmployeeController:
         self.actualizar_tiempo_activo()
         
     def  add_employee(self):
-        
-         if self.modelo.es_admin():
+        if self.modelo.es_admin():
             self.vista.view_add_employee()
-         
-         else:
-         
+        else:
             self.vista.mostrar_mensaje ("error","Error", "No tienes permiso para acceder a esta función.")
     
 

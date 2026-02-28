@@ -14,11 +14,7 @@ class LoginController:
         
         # 2. Lógica de verificación
         if usuario == "admin" and password == "1234":
-            # ¡El login fue exitoso! Le decimos al MainModel que cambie el estado.
-            # (Esto automáticamente disparará la notificación a tu MainView para cambiar el icono)
             self.main_modelo.set_admin(True) 
-            
-            # Cerramos la ventanita
             self.vista.cerrar()
             messagebox.showinfo("Login Exitoso", "Modo administrador activado.")
         else:

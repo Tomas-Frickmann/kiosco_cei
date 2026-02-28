@@ -2,12 +2,14 @@
 from modelos.main_model import MainModel
 from vistas.setting_view import SettingsView
 
+"""No entiendo lo de nombre de maquina"""
 class SettingsController:
     def __init__(self, parent, main_modelo: MainModel):
         self.main_modelo = main_modelo
         
         # Leemos el nombre actual directamente de nuestro MainModel
         nombre_actual = self.main_modelo.config_data.get("nombre_maquina", "SIN_NOMBRE")
+        
         
         # Instanciamos la vista pasándole el contenedor, a sí mismo, y el dato inicial
         self.vista = SettingsView(parent, self, nombre_actual)

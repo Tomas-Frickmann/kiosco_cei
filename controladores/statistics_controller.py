@@ -8,5 +8,3 @@ class StatisticsController:
        
         # Instanciamos la vista pasándole el contenedor, a sí mismo, y el dato inicial
         self.vista = StatisticsView(parent, self)
-
-   

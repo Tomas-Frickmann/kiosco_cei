@@ -11,7 +11,9 @@ import Datos.Connect as db
 from Utilitys.util_config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos2
 # from vistas.setting_view import  app_state
 from Utilitys.util_gestorimagenes import GestorImagenes as gi
+"""!!!!!!!!!!!"""
 from controladores.employee_controller import EmployeeController
+"""!!!!!!!!!!!"""
 
 class PanelEmpleados():
 

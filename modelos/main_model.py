@@ -4,6 +4,10 @@ import os
 
 from Utilitys.util_config import *
 
+
+"""No entiendo la utilidad del JSON
+    Qué son los extra?
+"""
 class MainModel:
     def __init__(self):
         self._es_admin = False
@@ -53,15 +57,12 @@ class MainModel:
         for callback in self._observadores:
             callback(self._es_admin)
             
-    # Agrega este método en tu MainModel
     def validar_password(self, password_ingresada):
-        # Aquí está la regla de negocio real
         contrasena_correcta = "1234"
         return password_ingresada == contrasena_correcta
     
     # En tu Modelo:
     def esta_activo(self, dni):
-        # Ahora buscamos por DNI, ¡es imposible que dos personas tengan el mismo!
         return dni in self.dnis_activos
     
     
