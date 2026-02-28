@@ -8,3 +8,11 @@ color_iconos_turquesa_oscuro="#00D6C1"
 color_iconos_oscuro='#0A3631'
 color_iconos2="#2a3138"
 #87E0C8
+
+NOMBRE="nombre"
+DNI="dni"
+DELETE="delete"
+EDIT="edit"
+ADD="add"
+
+CONSULTAR="consulta"

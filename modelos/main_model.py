@@ -1,11 +1,22 @@
+from datetime import datetime
 import json
 import os
+
+from Utilitys.util_config import *
 
 class MainModel:
     def __init__(self):
         self._es_admin = False
         self.ventas_global = [] 
         self._observadores = []
+        
+        self.dnis_activos = []
+        self.dnis_activos_extra = []
+        self.tiempo_activo = []
+        self.tiempo_activo_extra = []
+        self.hora_entrada = []
+        self.hora_entrada_extra = []
+        self.motivo_extra = []
         
         # --- NUEVO: Gestión de la configuración absorbida ---
         self.config_path = "config_maquina.json"
@@ -47,3 +58,35 @@ class MainModel:
         # Aquí está la regla de negocio real
         contrasena_correcta = "1234"
         return password_ingresada == contrasena_correcta
+    
+    # En tu Modelo:
+    def esta_activo(self, dni):
+        # Ahora buscamos por DNI, ¡es imposible que dos personas tengan el mismo!
+        return dni in self.dnis_activos
+    
+    
+    def actualiza_lista_activos(self,dni,accion,extra=False):
+        
+        index = self.dnis_activos.index(dni) 
+       
+        if accion == DELETE and extra==False:
+            self.dnis_activos.pop(index)
+            self.tiempo_activo.pop(index)  # Eliminar el tiempo correspondiente
+            self.hora_entrada.pop(index)  # Eliminar la hora de entrada correspondiente
+            
+        elif accion == DELETE and extra==True:
+            
+            self.dnis_activos_extra.pop(index)
+            self.tiempo_activo_extra.pop(index)  # Eliminar el tiempo correspondiente
+            self.hora_entrada_extra.pop(index)  # Eliminar la hora de entrada correspondiente
+            self.motivo_extra.pop(index)  # Eliminar el motivo correspondiente
+            
+        elif accion == ADD and extra==False:
+            
+            self.dnis_activos.append(dni)
+            self.tiempo_activo.append("00:00")  # Inicializar el tiempo activo
+            self.hora_entrada.append(datetime.now().strftime("%H:%M:%S"))  # Guardar la hora de entrada
+            self.actualizar_tiempo_activo()
+            
+    def registro_permitido(self):
+        return len(self.dnis_activos) < 2
