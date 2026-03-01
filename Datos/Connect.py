@@ -14,8 +14,10 @@ def execute_query(db_path,query, params=(), fetch=False):
     :return: Resultado de la consulta si fetch es True, de lo contrario None.
     """
     try:
-        conn = sql.connect(db_path,check_same_thread=False)
+        conn = sql.connect(db_path,check_same_thread=False) 
+        conn.row_factory = sql.Row 
         cursor = conn.cursor()
+       
         cursor.execute(query, params)
         
         if fetch:
@@ -31,12 +33,14 @@ def execute_query(db_path,query, params=(), fetch=False):
         print(f"Error en la base de datos: {e}")
         return None
     
-def GetEmpleados(self):
+def GetEmpleados():
     #Para leer filas
-    self.conexion=sql.connect("Datos/datos.db",check_same_thread=False)
-    self.cursor=self.conexion.cursor()
-    instruccion =f"SELECT * FROM empleados ORDER BY nombre" 
-    self.cursor.execute(instruccion)
-    datos = self.cursor.fetchall() #Devuelve Tuplas de (Dni,Nombre,fichado)
-    self.conexion.commit()
+    conexion=sql.connect("Datos/datos.db",check_same_thread=False)
+    conexion.row_factory = sql.Row 
+    cursor=conexion.cursor()
+    
+    instruccion =f"SELECT dni,nombre FROM empleados ORDER BY nombre" 
+    cursor.execute(instruccion)
+    datos = cursor.fetchall() #Devuelve Tuplas de (Dni,Nombre,fichado)
+    conexion.commit()
     return datos

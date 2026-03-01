@@ -1,5 +1,5 @@
 from tkinter import messagebox
-from controladores import statistics_controller
+from controladores.employee_controller import EmployeeController
 from vistas.main_view import MainView 
 from controladores.login_controller import LoginController
 from vistas.info_view import InfoView
@@ -12,7 +12,7 @@ from controladores.statistics_controller import StatisticsController
 from vistas.store_view import StoreView
 
 # from Forms.form_construccion import FormularioSitioContruccionDesign
-from vistas.employee_view import PanelEmpleados
+from vistas.employee_view import EmployeeView
 # from Forms.form_products import PanelProducts
 # from Forms.form_store import PanelStore
 
@@ -26,7 +26,7 @@ class MainController:
         self.MainBody = self.vista.cuerpo_principal
         self.ventana_info = None
         self.modelo.agregar_observador(self.vista.actualizar_ui_admin)
-
+        self.controlador_actual=None
     
         
 
@@ -41,15 +41,15 @@ class MainController:
             
     def open_statistics_panel(self):
         self.limpiar_panel(self.vista.cuerpo_principal)
-        StatisticsController(self.vista.cuerpo_principal, self.modelo)
+        self.controlador_actual=StatisticsController(self.vista.cuerpo_principal, self.modelo)
 
     def limpiar_panel(self,panel):
         for widget in panel.winfo_children():
             widget.destroy()
 
     def abrir_panel_empleados(self):
-        self.limpiar_panel(self.root.get_Panel_principal())
-        PanelEmpleados(self,self.vista.cuerpo_principal)
+        self.limpiar_panel(self.vista.cuerpo_principal)
+        self.controlador_actual=EmployeeController(self.root, self.vista.cuerpo_principal, self.modelo)
                        
 
 
@@ -58,8 +58,8 @@ class MainController:
     #     PanelProducts(self.vista.cuerpo_principal)
 
     def abrir_panel_store(self):
-        self.limpiar_panel(self.vista.cuerpo_principal)
-        StoreView(self.vista.cuerpo_principal,self.ventas_global)
+        self.limpiar_panel(self.vista.cuerpo_principal)     
+        self.controlador_actual=StoreView(self.vista.cuerpo_principal,self.ventas_global)
         
     def log_in_out(self):
         
@@ -67,11 +67,11 @@ class MainController:
             self.modelo.set_admin(False)
             messagebox.showinfo("Sesión Cerrada", "Modo empleado activado.")
         else:
-            LoginController(self.MainBody, self.modelo)
+            self.controlador_actual=LoginController(self.MainBody, self.modelo)
             
     def abrir_panel_setting(self):
         self.limpiar_panel(self.MainBody)
         # En lugar de instanciar el formulario viejo, levantamos el controlador nuevo
         # Le inyectamos el espacio de trabajo (MainBody) y nuestra base de datos en memoria (modelo)
-        SettingsController(self.MainBody, self.modelo)
+        self.controlador_actual=SettingsController(self.MainBody, self.modelo)
     

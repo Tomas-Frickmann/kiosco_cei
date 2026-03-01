@@ -10,7 +10,7 @@ from tkinter import filedialog
 from tkcalendar import Calendar
 import Datos.Connect as db
 
-from modelos.main_model import MainModel , carg
+from modelos.main_model import MainModel 
 from Utilitys.util_config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral,color_iconos_turquesa_oscuro,color_fondo_gris
 
 class StoreView():
