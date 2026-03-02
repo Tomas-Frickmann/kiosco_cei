@@ -1,5 +1,9 @@
 import Datos.Connect as db
 import datetime
+from Utilitys.util_config import *
+
+# (Si no tenés estas constantes en util_config, dejalas acá)
+
 
 class StoreModel:
     def __init__(self):
@@ -20,7 +24,7 @@ class StoreModel:
         query = "SELECT 1 FROM productos WHERE nombre = ? OR codigo = ? LIMIT 1"
         return db.execute_query("Datos/datos.db", query, (producto_ingresado, producto_ingresado), fetch=True)
 
-    def guardar_venta_completa(self, maquina, total_efectivo, total_transferencia, total_general, metodo_pago, lista_ventas):
+    def guardar_venta_completa(self, nombre_maquina, efectivo, transferencia, total_general, metodo_pago):
         now = datetime.datetime.now()
         fecha = now.strftime("%Y-%m-%d")
         hora = now.strftime("%H:%M:%S")
@@ -29,20 +33,22 @@ class StoreModel:
             INSERT INTO ventas (fecha, hora, maquina, efectivo, transferencia, total, metodo_pago)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """
-        db.execute_query("Datos/datos.db", query_venta, (fecha, hora, maquina, total_efectivo, total_transferencia, total_general, metodo_pago))
+        # Se agregan los 7 parámetros correctos
+        db.execute_query("Datos/datos.db", query_venta, (fecha, hora, nombre_maquina, efectivo, transferencia, total_general, metodo_pago))
 
         query_id = "SELECT id FROM ventas WHERE maquina = ? ORDER BY id DESC LIMIT 1"
-        venta_id = db.execute_query("Datos/datos.db", query_id, (maquina,), fetch=True)[0]["id"]
+        venta_id = db.execute_query("Datos/datos.db", query_id, (nombre_maquina,), fetch=True)[0]["id"]
+        lista_ventas = self.obtener_carrito()
 
         for prod in lista_ventas:
-            # prod: (nombre, precio, cantidad, metodo, total, categoria, subcategoria, descripcion)
+            # Insertamos en detalle_ventas inyectando el metodo_pago de la venta general
             query_detalle = """
                 INSERT INTO detalle_ventas (venta_id, producto, categoria, subcategoria, cantidad, precio_unitario, total, metodo_pago)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
             db.execute_query(
                 "Datos/datos.db", query_detalle,
-                (venta_id, prod[0], prod[5], prod[6], prod[2], prod[1], prod[4], prod[3])
+                (venta_id, prod["producto"], prod["categoria"], prod["subcategoria"], prod["cantidad"], prod["precio_unitario"], prod["total"], metodo_pago)
             )
 
     def obtener_resumen_caja(self, fecha_inicio, fecha_fin):
@@ -63,3 +69,43 @@ class StoreModel:
     def obtener_detalle_de_venta(self, venta_id):
         query = "SELECT producto, cantidad, precio_unitario, total, metodo_pago FROM detalle_ventas WHERE venta_id = ?"
         return db.execute_query("Datos/datos.db", query, (venta_id,), fetch=True)
+    
+    # ==========================================
+    # MANEJO DEL CARRITO TEMPORAL (BASE DE DATOS)
+    # ==========================================
+
+    def obtener_carrito(self):
+        # Eliminamos método de pago del SELECT
+        query = f"SELECT id, {PRODUCTO}, {PRECIO_PRODUCTO}, {CANTIDAD_PRODUCTO}, {TOTAL_PRODUCTO}, {CATEGORIA_PRODUCTO}, {SUBCATEGORIA_PRODUCTO} FROM {TABLA_CARRITO}"
+        return db.execute_query("Datos/datos.db", query, fetch=True)
+
+    def actualizar_cantidad_carrito(self, id_item, nueva_cantidad, nuevo_total):
+        query = f"UPDATE {TABLA_CARRITO} SET {CANTIDAD_PRODUCTO} = ?, {TOTAL_PRODUCTO} = ? WHERE id = ?"
+        db.execute_query("Datos/datos.db", query, (nueva_cantidad, nuevo_total, id_item))
+
+    def calcular_total_carrito(self):
+        # Consulta directa del total, evitando errores de llamadas
+        query = f"SELECT SUM({TOTAL_PRODUCTO}) FROM {TABLA_CARRITO}"
+        resultado = db.execute_query("Datos/datos.db", query, fetch=True)
+        
+        if resultado and resultado[0][0] is not None:
+            return float(resultado[0][0])
+        return 0.0   
+
+    def eliminar_del_carrito(self, id_item):
+        query = f"DELETE FROM {TABLA_CARRITO} WHERE id = ?"
+        db.execute_query("Datos/datos.db", query, (id_item,))
+
+    def vaciar_carrito(self):
+        query = f"DELETE FROM {TABLA_CARRITO}"
+        db.execute_query("Datos/datos.db", query)
+    
+    def agregar_producto_carrito(self, params):
+        # Insertamos solo 7 valores al carrito (sin el método de pago)
+        query = f""" INSERT INTO {TABLA_CARRITO} ({PRODUCTO}, {PRECIO_PRODUCTO}, {CANTIDAD_PRODUCTO}, {TOTAL_PRODUCTO}, {CATEGORIA_PRODUCTO}, {SUBCATEGORIA_PRODUCTO}) VALUES (?,?,?,?,?,?)"""
+        db.execute_query("Datos/datos.db", query, params)
+
+    def carrito_vacio(self):
+        query = f"SELECT COUNT(*) FROM {TABLA_CARRITO}"
+        resultado = db.execute_query("Datos/datos.db", query, fetch=True)
+        return resultado[0][0] == 0 # Devuelve True si es 0, False si hay algo
