@@ -103,7 +103,22 @@ class ProductsPanel():
         # Llenar la tabla con productos
         self.update_treeview()
 
+    def get_products(self):
+        columnas = []
+        try:
+            productos = self.controlador.consulta_mid("Columnas", None, True)
+            columnas = list(productos[0].keys())
+            print("Columnas:", columnas)
+            return productos
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            return []
+
     def update_treeview(self):
+        """Entiendo actualiza la tabla de productos
+        TreeView es un Scroll pane o algo similar
+        Insertas por filas, """
+
         productos = self.get_products()
 
         # Borrar todos los ítems anteriores
@@ -135,8 +150,6 @@ class ProductsPanel():
                 self.tree.insert("", tk.END, values=row)
     
     def producto(self,edicion=False, producto_id=None):
-
-
         ##Edicion 
         if edicion:
             # Si es edición, cargar el producto seleccionado
@@ -184,7 +197,7 @@ class ProductsPanel():
 
         # Si hay un ID, cargar los datos
         if producto_id:
-            resultado = self.controlador.consulta_mid("SELECT * FROM productos WHERE id = ?", (producto_id,), True)
+            resultado = self.controlador.consulta_mid("BuscaID", (producto_id,), True)
             if resultado is None:
                 messagebox.showerror("Error", f"No se pudo obtener el producto")
                 return

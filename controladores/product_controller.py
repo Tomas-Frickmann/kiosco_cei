@@ -7,8 +7,9 @@ class ProductsController():
         self.mainBody = main_body
         self.mainModel = main_model
 
-        self.productBody = ProductsPanel(self.mainBody, self) #(vista ppal; controlador)
         self.productModel = ProductsModel()
+        self.productBody = ProductsPanel(self.mainBody, self) #(vista ppal; controlador)
+        
 
     def consulta_mid(self, query:str, param:tuple, fetch:bool):
         """Query es reutilizado, primero indica la accion y luego la consulta"""
@@ -16,8 +17,11 @@ class ProductsController():
             query = "SELECT id, codigo, nombre, descripcion, precio, stock FROM productos WHERE LOWER(nombre) LIKE LOWER(?) OR LOWER(codigo) LIKE LOWER(?)"
         elif query == "BuscaID":
             query = "SELECT * FROM productos WHERE id = ?"
+        elif query == "Columnas":
+            query = "SELECT * FROM Productos"
+
         
-        self.productModel.consultadb(query, param, fetch)
+        return self.productModel.consultadb(query, param, fetch)
 
 
 

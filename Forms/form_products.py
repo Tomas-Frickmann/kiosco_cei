@@ -60,22 +60,7 @@ class PanelProducts():
                                   fg="Black", command=self.search_product)
         button_search.pack(side=tk.RIGHT, fill='both', expand=False, padx=5, pady=5)
 
-    def search_product(self):
-        # Obtener el texto de búsqueda
-        search_text = self.entry_search.get().strip()
-        # Buscar productos cuyo nombre contenga el texto (insensible a mayúsculas/minúsculas)
-        query = "SELECT id, codigo, nombre, descripcion, precio, stock FROM productos WHERE LOWER(nombre) LIKE LOWER(?) OR LOWER(codigo) LIKE LOWER(?)"
-        param = f"%{search_text}%"
-        results = db.execute_query("Datos/datos.db", query, (param, param), fetch=True)
-
-        # Limpiar la tabla
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        # Si hay resultados, mostrarlos; si no, la tabla queda vacía
-        if results:
-            for row in results:
-                self.tree.insert("", tk.END, values=row)
+    
 
     def save_product(self):
         codigo = self.campos["codigo"].get()

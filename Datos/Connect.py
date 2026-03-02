@@ -32,6 +32,7 @@ def execute_query(db_path,query, params=(), fetch=False):
         return result
     except sql.Error as e:
         print(f"Error en la base de datos: {e}")
+        print(e.args)
         return None
     
 def GetEmpleados():
@@ -66,4 +67,5 @@ def crear_tabla():
     cursor.close()
     conexion.close()
     print("✅ Tabla 'carrito_temporal' verificada/creada con éxito.")
+
 

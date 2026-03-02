@@ -9,4 +9,8 @@ class ProductsModel():
 
 
     def consultadb(self, query:str, param:tuple, fetch:bool):
-        return db.execute_query(DB_DIRECTORY, query, param, fetch)
+        if param:
+            return db.execute_query(db_path=DB_DIRECTORY, query=query, params=param, fetch=fetch)
+        else:
+            return db.execute_query(db_path=DB_DIRECTORY, query=query, fetch=fetch)
+    
