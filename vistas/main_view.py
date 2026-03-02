@@ -106,7 +106,7 @@ class MainView:
             (self.Setting, self.buttonSettings1, self.controlador.abrir_panel_setting)
         ]
         for image, button, comando in iconos_info:
-            self.configurar_boton_icono(button, image, ancho_menu, alto_menu, comando) 
+            self.configurar_boton_icono(button, image, ancho_menu, alto_menu, comando)
 
     def controles_menu_lateral(self):
         ancho_menu, alto_menu = 10, 2

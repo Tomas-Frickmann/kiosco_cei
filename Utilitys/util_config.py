@@ -33,3 +33,6 @@ SUBCATEGORIA_PRODUCTO="SubCategoria"
 PROVEDOOR_PRODUCTO="Proveedor"
 IMAGEN_PRODUCTO="Imagen"
 CONTROL_STOCK_PRODUCTO="ControlStock"
+
+#Direcciones
+DB_DIRECTORY = "Datos/datos.db"

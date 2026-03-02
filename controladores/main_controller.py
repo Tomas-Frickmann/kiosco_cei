@@ -48,7 +48,7 @@ class MainController:
 
     def abrir_panel_products(self):
         self.limpiar_panel(self.vista.cuerpo_principal)
-        self.controlador_actual = ProductsController(self.vista.cuerpo_principal)
+        self.controlador_actual = ProductsController(self.vista.cuerpo_principal, self.modelo)
 
     def abrir_panel_store(self):
         self.limpiar_panel(self.vista.cuerpo_principal)
