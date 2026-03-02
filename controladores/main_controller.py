@@ -1,5 +1,6 @@
 from tkinter import messagebox
 from controladores.employee_controller import EmployeeController
+from controladores.store_contrller import StoreController
 from vistas.main_view import MainView 
 from controladores.login_controller import LoginController
 from vistas.info_view import InfoView
@@ -9,7 +10,7 @@ from vistas.info_view import InfoView
 from modelos.main_model import MainModel
 from controladores.settings_controller import SettingsController
 from controladores.statistics_controller import StatisticsController
-from vistas.store_view import StoreView
+from vistas.form_store_view import StoreView
 
 # from Forms.form_construccion import FormularioSitioContruccionDesign
 from vistas.employee_view import EmployeeView
@@ -27,6 +28,8 @@ class MainController:
         self.ventana_info = None
         self.modelo.agregar_observador(self.vista.actualizar_ui_admin)
         self.controlador_actual=None
+        
+        
     
         
 
@@ -59,7 +62,7 @@ class MainController:
 
     def abrir_panel_store(self):
         self.limpiar_panel(self.vista.cuerpo_principal)     
-        self.controlador_actual=StoreView(self.vista.cuerpo_principal,self.ventas_global)
+        self.controlador_actual=StoreController(self.root, self.vista.cuerpo_principal, self.modelo)
         
     def log_in_out(self):
         

@@ -1,3 +1,6 @@
+from tkinter.tix import IMAGE
+
+
 color_barra_superior = "#1f2329"
 color_fondo_gris = "#2a3130"
 color_menu_lateral = "#2a3138"
@@ -16,3 +19,17 @@ EDIT="edit"
 ADD="add"
 
 CONSULTAR="consulta"
+
+#CONSTANTES DE TABLA PRODUCTOS 
+
+CODIGO_PRODUCTO="Codigo"
+BARRAS_PRODUCTO="Barras"
+NOMBRE_PRODUCTO="Nombre"
+PRECIO_PRODUCTO="Precio"
+DESCRIPCION_PRODUCTO="Descripcion"
+STOCK_PRODUCTO="Stock"
+CATEGORIA_PRODUCTO="Categoria"
+SUBCATEGORIA_PRODUCTO="SubCategoria"
+PROVEDOOR_PRODUCTO="Proveedor"
+IMAGEN_PRODUCTO="Imagen"
+CONTROL_STOCK_PRODUCTO="ControlStock"

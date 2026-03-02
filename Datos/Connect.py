@@ -1,6 +1,7 @@
 import sqlite3 as sql
 from datetime import datetime
 
+ruta_base="Datos/datos.db"
 
 def execute_query(db_path,query, params=(), fetch=False):
     """
@@ -35,7 +36,7 @@ def execute_query(db_path,query, params=(), fetch=False):
     
 def GetEmpleados():
     #Para leer filas
-    conexion=sql.connect("Datos/datos.db",check_same_thread=False)
+    conexion=sql.connect(ruta_base,check_same_thread=False)
     conexion.row_factory = sql.Row 
     cursor=conexion.cursor()
     
@@ -44,3 +45,24 @@ def GetEmpleados():
     datos = cursor.fetchall() #Devuelve Tuplas de (Dni,Nombre,fichado)
     conexion.commit()
     return datos
+
+def crear_tabla():
+    conexion=sql.connect(ruta_base,check_same_thread=False)
+    cursor = conexion.cursor()
+    conexion.row_factory = sql.Row 
+    # Creamos la tabla temporal del carrito
+    query = """
+    CREATE TABLE IF NOT EXISTS carrito_temporal (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        producto TEXT NOT NULL,
+        precio_unitario REAL NOT NULL,
+        cantidad REAL NOT NULL,
+        total REAL NOT NULL,
+    )
+    """
+    cursor.execute(query)
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    print("✅ Tabla 'carrito_temporal' verificada/creada con éxito.")
+

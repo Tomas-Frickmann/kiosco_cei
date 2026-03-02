@@ -3,6 +3,9 @@ import json
 import os
 
 from Utilitys.util_config import *
+import Datos.Connect as db
+
+
 
 
 """No entiendo la utilidad del JSON
@@ -25,6 +28,7 @@ class MainModel:
         # --- NUEVO: Gestión de la configuración absorbida ---
         self.config_path = "config_maquina.json"
         self.config_data = self.cargar_configuracion()
+        db.crear_tabla()
 
     # --- Lógica del JSON ---
     def cargar_configuracion(self):

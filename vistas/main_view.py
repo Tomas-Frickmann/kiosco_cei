@@ -1,53 +1,10 @@
 import tkinter as tk
-from tkinter import messagebox
 from tkinter import font
-
 from Utilitys.util_config import color_barra_superior,color_cuerpo_principal,color_menu_cursor_encima,color_menu_lateral
 import Utilitys.util_ventana as util_ventana
-import Utilitys.util_images as util_img
 from Utilitys.util_gestorimagenes import GestorImagenes as gi
 
 
-
-# class MainView(tk.Tk):
-
-#     def __init__(self):
-#         super().__init__()
-
-       
-#         self.logo = util_img.leer_imagen("./Images/Logo.png",(300,300))
-#         self.img_construccion = util_img.leer_imagen("./Images/Construccion.png",(220,220))
-
-#         #Iconos
-#         self.caja = util_img.leer_imagen("./Images/Caja.png",(40,40))
-#         self.calculate = util_img.leer_imagen("./Images/Calculate.png",(40,40))
-#         self.Empleados = util_img.leer_imagen("./Images/Empleados.png",(40,40))
-#         self.Graph = util_img.leer_imagen("./Images/Graph.png",(40,40))
-#         self.Info = util_img.leer_imagen("./Images/Info.png",(40,40))
-#         self.Setting = util_img.leer_imagen("./Images/Setting.png",(40,40))
-#         self.Nube = util_img.leer_imagen("./Images/Nube.png",(40,40))
-#         self.Menu = util_img.leer_imagen("./Images/Menu.png",(40,40))
-#         self.Lista = util_img.leer_imagen("./Images/Lista.png",(40,40))
-
- 
-
-#         #iconos para empleados
-#         self.add= util_img.leer_imagen("./Images/add.png",(60,60))
-#         self.delete=util_img.leer_imagen("./Images/Erase.png",(60,60))
-#         self.edit= util_img.leer_imagen("./Images/edit.png",(60,60))
-#         self.consulta= util_img.leer_imagen("./Images/consulta.png",(60,60))
-        
-#         #icono admin
-#         self.On = util_img.leer_imagen("./Images/On.png",(20,20))
-#         self.Off = util_img.leer_imagen("./Images/Off.png",(20,20))  
-
-#         #Carga las ventanas
-#         self.config_window()
-#         self.paneles()
-#         self.controles_barra_superior()
-#         self.controles_menu_iconos()
-#         self.controles_menu_lateral()
-#         self.controles_cuerpo()
 class MainView:
     # 1. Ya no hereda de tk.Tk. Ahora recibe la ventana (root) y el cerebro (controlador)
     def __init__(self, root, controlador):
@@ -132,7 +89,7 @@ class MainView:
     def controles_menu_iconos(self):
         ancho_menu, alto_menu = 60, 57
         
-        # self.buttonCaja1 = tk.Button(self.menu_iconos)
+        self.buttonCaja1 = tk.Button(self.menu_iconos)
         # self.buttonProductos1 = tk.Button(self.menu_iconos)
         self.buttonEmpleados1 = tk.Button(self.menu_iconos)
         self.buttonEstadisticas1 = tk.Button(self.menu_iconos)
@@ -141,7 +98,7 @@ class MainView:
 
         # 4. Los comandos ahora apuntan a self.controlador
         iconos_info = [
-            # (self.caja, self.buttonCaja1, self.controlador.abrir_panel_store),
+            (self.caja, self.buttonCaja1, self.controlador.abrir_panel_store),
             # (self.Lista, self.buttonProductos1, self.controlador.abrir_panel_products),
             (self.Empleados, self.buttonEmpleados1, self.controlador.abrir_panel_empleados),
             (self.Graph, self.buttonEstadisticas1, self.controlador.open_statistics_panel),
@@ -155,7 +112,7 @@ class MainView:
         ancho_menu, alto_menu = 10, 2
         font_awesome = font.Font(family='FontAwesome', size=15)
         
-        # self.buttonCaja = tk.Button(self.menu_lateral)
+        self.buttonCaja = tk.Button(self.menu_lateral)
         # self.buttonProductos = tk.Button(self.menu_lateral)
         self.buttonEmpleados = tk.Button(self.menu_lateral)
         self.buttonEstadisticas = tk.Button(self.menu_lateral)
@@ -163,7 +120,7 @@ class MainView:
         self.buttonSettings = tk.Button(self.menu_lateral)
 
         buttons_info = [
-        #     ("Caja", self.buttonCaja, self.controlador.abrir_panel_store),
+            ("Caja", self.buttonCaja, self.controlador.abrir_panel_store),
         #     ("Productos", self.buttonProductos, self.controlador.abrir_panel_products),
             ("Empleados", self.buttonEmpleados, self.controlador.abrir_panel_empleados),
             ("Estadisticas", self.buttonEstadisticas, self.controlador.open_statistics_panel),
