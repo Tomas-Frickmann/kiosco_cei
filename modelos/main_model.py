@@ -14,7 +14,7 @@ import Datos.Connect as db
 class MainModel:
     def __init__(self):
         self._es_admin = False
-        self.ventas_global = [] 
+        
         self._observadores = []
         
         self.dnis_activos = []
