@@ -90,7 +90,7 @@ class MainView:
         ancho_menu, alto_menu = 60, 57
         
         self.buttonCaja1 = tk.Button(self.menu_iconos)
-        # self.buttonProductos1 = tk.Button(self.menu_iconos)
+        self.buttonProductos1 = tk.Button(self.menu_iconos)
         self.buttonEmpleados1 = tk.Button(self.menu_iconos)
         self.buttonEstadisticas1 = tk.Button(self.menu_iconos)
         self.buttonInfo1 = tk.Button(self.menu_iconos)
@@ -99,7 +99,7 @@ class MainView:
         # 4. Los comandos ahora apuntan a self.controlador
         iconos_info = [
             (self.caja, self.buttonCaja1, self.controlador.abrir_panel_store),
-            # (self.Lista, self.buttonProductos1, self.controlador.abrir_panel_products),
+            (self.Lista, self.buttonProductos1, self.controlador.abrir_panel_products),
             (self.Empleados, self.buttonEmpleados1, self.controlador.abrir_panel_empleados),
             (self.Graph, self.buttonEstadisticas1, self.controlador.open_statistics_panel),
             (self.Info, self.buttonInfo1, self.controlador.abrir_panel_info),
@@ -113,7 +113,7 @@ class MainView:
         font_awesome = font.Font(family='FontAwesome', size=15)
         
         self.buttonCaja = tk.Button(self.menu_lateral)
-        # self.buttonProductos = tk.Button(self.menu_lateral)
+        self.buttonProductos = tk.Button(self.menu_lateral)
         self.buttonEmpleados = tk.Button(self.menu_lateral)
         self.buttonEstadisticas = tk.Button(self.menu_lateral)
         self.buttonInfo = tk.Button(self.menu_lateral)
@@ -121,7 +121,7 @@ class MainView:
 
         buttons_info = [
             ("Caja", self.buttonCaja, self.controlador.abrir_panel_store),
-        #     ("Productos", self.buttonProductos, self.controlador.abrir_panel_products),
+            ("Productos", self.buttonProductos, self.controlador.abrir_panel_products),
             ("Empleados", self.buttonEmpleados, self.controlador.abrir_panel_empleados),
             ("Estadisticas", self.buttonEstadisticas, self.controlador.open_statistics_panel),
             ("Info", self.buttonInfo, self.controlador.abrir_panel_info),

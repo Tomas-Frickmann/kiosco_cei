@@ -576,10 +576,11 @@ class EmployeeController:
         self.root = root
         
         # 2. Creamos el modelo de empleados (el que habla con la base de datos)
-        self.employee_model = EmployeeModel()
-        
+        self.employee_model = EmployeeModel(self.main_modelo)
+
         # 3. Creamos la vista y le pasamos este controlador
         self.vista = EmployeeView(root,main_body, self)
+
         self.actualizar_tiempo_activo()
 
     # ==========================================

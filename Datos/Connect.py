@@ -51,15 +51,16 @@ def crear_tabla():
     cursor = conexion.cursor()
     conexion.row_factory = sql.Row 
     # Creamos la tabla temporal del carrito
-    query = """
+    query =""""""
+    
+    """
     CREATE TABLE IF NOT EXISTS carrito_temporal (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         producto TEXT NOT NULL,
         precio_unitario REAL NOT NULL,
         cantidad REAL NOT NULL,
         total REAL NOT NULL,
-    )
-    """
+    );"""
     cursor.execute(query)
     conexion.commit()
     cursor.close()

@@ -10,18 +10,17 @@ from vistas.info_view import InfoView
 from modelos.main_model import MainModel
 from controladores.settings_controller import SettingsController
 from controladores.statistics_controller import StatisticsController
+from controladores.product_controller import ProductsController
 from vistas.form_store_view import StoreView
 
 # from Forms.form_construccion import FormularioSitioContruccionDesign
-from vistas.employee_view import EmployeeView
-# from Forms.form_products import PanelProducts
 # from Forms.form_store import PanelStore
 
 class MainController:
     def __init__(self, root):
         
         self.root = root
-        self.ventas_global=[] 
+        self.ventas_global=[]
         self.modelo = MainModel()
         self.vista = MainView(self.root, self)
         self.MainBody = self.vista.cuerpo_principal
@@ -29,17 +28,10 @@ class MainController:
         self.modelo.agregar_observador(self.vista.actualizar_ui_admin)
         self.controlador_actual=None
         
-        
-    
-        
-
     def abrir_panel_info(self):
-       
         if self.ventana_info is None or not self.ventana_info.winfo_exists():
-           
             self.ventana_info = InfoView()
         else:
-           
             self.ventana_info.lift()
             
     def open_statistics_panel(self):
@@ -53,15 +45,13 @@ class MainController:
     def abrir_panel_empleados(self):
         self.limpiar_panel(self.vista.cuerpo_principal)
         self.controlador_actual=EmployeeController(self.root, self.vista.cuerpo_principal, self.modelo)
-                       
 
-
-    # def abrir_panel_products(self):
-    #     self.limpiar_panel(self.vista.cuerpo_principal)
-    #     PanelProducts(self.vista.cuerpo_principal)
+    def abrir_panel_products(self):
+        self.limpiar_panel(self.vista.cuerpo_principal)
+        self.controlador_actual = ProductsController(self.vista.cuerpo_principal)
 
     def abrir_panel_store(self):
-        self.limpiar_panel(self.vista.cuerpo_principal)     
+        self.limpiar_panel(self.vista.cuerpo_principal)
         self.controlador_actual=StoreController(self.root, self.vista.cuerpo_principal, self.modelo)
         
     def log_in_out(self):

@@ -619,7 +619,6 @@ class EmployeeView():
         self.PanelEmpleados(panel_principal)
 
         # Llenamos las listas por primera vez
-        
 
     def crear_boton_empleado(self, parent, text, image, command):
         frame = tk.Frame(parent, bg=color_barra_superior)
@@ -824,12 +823,10 @@ class EmployeeView():
                 tk.Button(frame4, text="Eliminar", font=('Calibri', 12), bg='#FF6B6B', fg='white',
                           command=lambda d=dni, n=nombre: self.controlador.delete_employee(n, d, "eliminar")).grid(row=i+1, column=0, sticky="nsew", padx=5, pady=2)
 
-   
-
     # ==========================================
     # VENTANAS EMERGENTES (TOPLEVELS)
     # ==========================================
-    def abrir_ventana(self, title):
+    def abrir_ventana(self, title: str):
         nueva_ventana = tk.Toplevel(self.root, bg=color_menu_lateral)
         nueva_ventana.title(title)
         nueva_ventana.geometry("600x600")
@@ -841,7 +838,7 @@ class EmployeeView():
         frame_boton.grid_columnconfigure(1, weight=1)
 
         boton_actualizar = tk.Button(frame_boton, text="Actualizar", font=('Calibri', 12), bg='#6D8299', fg='white',
-                                     command=lambda: self.TablaEmpleados(frame_tabla1, frame_tabla2, "dni", edicion=True, frame3=frame_tabla3, frame4=frame_tabla4))
+                                    command=lambda: self.TablaEmpleados(frame_tabla1, frame_tabla2, "dni", edicion=True, frame3=frame_tabla3, frame4=frame_tabla4))
         boton_actualizar.grid(row=0, column=0, sticky="nsew", padx=10, pady=5)
         tk.Button(frame_boton, text="Cerrar", font=('Calibri', 12), bg='#FF6B6B', fg='white', command=nueva_ventana.destroy).grid(row=0, column=1, sticky="nsew", padx=10, pady=5)
 
