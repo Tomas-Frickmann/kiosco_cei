@@ -737,6 +737,12 @@ class EmployeeController:
     # REPORTES
     # ==========================================
     def generar_informe(self, fecha_inicio, fecha_fin, ventana):
+        try:
+            fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+            fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+        except ValueError:
+            self.vista.mostrar_mensaje("error","Error", "Las fechas deben estar en formato YYYY-MM-DD.")
+            return
         if fecha_inicio > fecha_fin:
             self.vista.mostrar_mensaje("error", "Error", "La fecha de inicio no puede ser mayor que la fecha de fin.")
             return

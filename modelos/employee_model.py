@@ -131,6 +131,7 @@ class EmployeeModel:
     # ==========================================
     def generar_pdf(self, registros, fecha_inicio, fecha_fin, ruta_guardado):
         # Esta es tu misma lógica de PDF, pero guardada de forma segura en el Modelo
+        
         empleados = {}
         for registro in registros:
             dni, nombre, fecha, hora_entrada, hora_salida, tiempo_total, expulsion = registro
