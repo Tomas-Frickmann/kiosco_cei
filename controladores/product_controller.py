@@ -12,18 +12,29 @@ class ProductsController():
         
 
     def consulta_mid(self, query:str, param:tuple, fetch:bool):
-        """Query es reutilizado, primero indica la accion y luego la consulta"""
+        """Columnas: Devuelve todos los valores de las columnas especificadas por la constante de columnas de productos
+            Busqueda: Lo mismo que columnas pero bajo ciertas condiciones
+            BuscaID: 
+        """
         if query == "Busqueda":
-            query = "SELECT id, codigo, nombre, descripcion, precio, stock FROM productos WHERE LOWER(nombre) LIKE LOWER(?) OR LOWER(codigo) LIKE LOWER(?)"
+            print("Param: ", param)
+            query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM productos WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
         elif query == "BuscaID":
             query = "SELECT * FROM productos WHERE id = ?"
         elif query == "Columnas":
-            query = "SELECT * FROM Productos"
-
+            query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM Productos"
         
         return self.productModel.consultadb(query, param, fetch)
+    
+    def lista_to_string(self, lista:list):
+        string = lista[0]
+        for x in lista[1:]:
+            string += ", " + x
+        return string + " "
+    
     def columnas(self, row):
-        controla = "Sí" if row["controlstock"] else "No"
+        """Devuelve una fila en base a las cabeceras enviadas"""
+        controla = "Sí" if row[self.productModel.ControlStock] else "No"
         categorias = (i for i in self.productModel.ColumnasProductos) #De está manera el controlador no conoce las constantes, las conoce el modelo
         values = []
         for x in categorias:

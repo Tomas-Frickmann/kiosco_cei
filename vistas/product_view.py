@@ -36,8 +36,7 @@ class ProductsPanel():
         label_search.pack(side=tk.LEFT, fill='both', expand=False, padx=5, pady=5)
         self.entry_search = tk.Entry(frame_search, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black")
         self.entry_search.pack(side=tk.LEFT, fill='both', expand=True, padx=5, pady=5)
-        self.entry_search.bind("<KeyRelease>", lambda event: self.search_product)
-        self.entry_search.bind("<Return>", lambda event: self.search_product)
+        self.entry_search.bind("<KeyRelease>", self.search_product)
 
 
         # Botón para agregar producto
@@ -48,7 +47,7 @@ class ProductsPanel():
 
         # Botón para editar producto seleccionado
         btn_editar = tk.Button(frame_search, text="Editar Producto", font=('Calibri', 12),
-                            bg=color_iconos_turquesa_oscuro, fg="Black", command=lambda: self.producto(True))
+                            bg=color_iconos_turquesa_oscuro, fg="Black", command=lambda: self.producto(edicion = True))
         btn_editar.pack(side=tk.RIGHT, fill='x', padx=5, pady=5)
 
         # Botón para buscar producto
@@ -82,15 +81,17 @@ class ProductsPanel():
         frame_tabla.pack(fill='both', expand=True)
 
         # Definir columnas a mostrar
-        columnas = ("id", "codigo", "nombre", "descripcion", "precio", "stock","controlstock")
-        # Ancho de cada columna
-        ancho_columnas = {"id":10,"codigo": 50,"nombre": 100,"descripcion": 300,"precio": 100,"stock": 50,"controlstock": 50}
+        columnas = self.controlador.consulta_mid("Columnas", None, True)
+        ##Columnas es una lista de Row
 
+        listaCabeceras = columnas[0].keys()
+
+        ancho_columnas = dict(zip(listaCabeceras, [len(str(x))*10 for x in listaCabeceras]))
         # Crear Treeview
         """TREE"""
-        self.tree = ttk.Treeview(frame_tabla, columns=columnas, show="headings", selectmode="browse",style="Product.Treeview",)
+        self.tree = ttk.Treeview(frame_tabla, columns=listaCabeceras, show="headings", selectmode="browse",style="Product.Treeview",)
         """TREE"""
-        for col in columnas:
+        for col in listaCabeceras:
             self.tree.heading(col, text=col.capitalize(), command=lambda c=col: self.sort_by_column(c, False))
             self.tree.column(col, width=ancho_columnas.get(col, 100), anchor="center")
 
@@ -104,7 +105,6 @@ class ProductsPanel():
         self.update_treeview()
 
     def get_products(self):
-        columnas = []
         try:
             productos = self.controlador.consulta_mid("Columnas", None, True)
             return productos
@@ -121,42 +121,26 @@ class ProductsPanel():
         productos = self.get_products()
         for row in productos:
             values = self.controlador.columnas(row)
-            self.tree.insert("", tk.END, values=(values))
+            self.tree.insert("", tk.END, values=values)
    
-    def search_product(self):
+    def search_product(self, event=None):
         # Obtener el texto de búsqueda
         search_text = self.entry_search.get().strip()
         # Buscar productos cuyo nombre contenga el texto (insensible a mayúsculas/minúsculas)
-        text = f"%{search_text}%"
-        param = (text, text)
+        param = "%" + search_text + "%"
+        results = self.controlador.consulta_mid("Busqueda", (param, param), True)
 
-        results = self.controlador.consulta_mid("Busqueda", param, True)
-
-        # Limpiar la tabla
         for item in self.tree.get_children():
             self.tree.delete(item)
-
         # Si hay resultados, mostrarlos; si no, la tabla queda vacía
         if results:
             for row in results:
-                self.tree.insert("", tk.END, values=row)
+                values = self.controlador.columnas(row)
+                self.tree.insert("", tk.END, values=values)
     
-    def producto(self,edicion=False, producto_id=None):
-        ##Edicion 
-        if edicion:
-            # Si es edición, cargar el producto seleccionado
-            selected = self.tree.focus()
-            if not selected:
-                messagebox.showwarning("Atención", "Seleccione un producto para editar.")
-                return
-            valores = self.tree.item(selected, "values")
-            producto_id = valores[0]
-            pass
-        else:
-            pass
-        """"""
+    def ventanaEditarAgregar(self, edicion=False):
         self.new_window = tk.Toplevel(self.subcuerpo)
-        self.new_window.title("Editar Producto" if producto_id else "Agregar Producto")
+        self.new_window.title("Editar Producto" if edicion else "Agregar Producto")
         self.new_window.geometry("600x600")
         self.new_window.config(bg=color_menu_lateral)
 
@@ -166,9 +150,39 @@ class ProductsPanel():
         self.campos = {}
         self.checks = {}
         
+    def ventanaAgregar(self):
+        #Hay que crear los campos de texto de TODAS LAS CATEGORIAS
+        pass
+
+    def ventanaEditar(self):
+        #Hay que crear los campos de texto de TODAS LAS CATEGORIAS
+        pass
+
+
+    def producto(self,edicion=False, producto_id=None, event = None):
+        ##Edicion
+        if edicion:
+            selected = self.tree.focus()
+            if not selected:
+                messagebox.showwarning("Atención", "Seleccione un producto para editar.")
+                return
+            valores = self.tree.item(selected, "values")
+            producto_id = valores[0]
+            print(valores)
+            self.ventanaEditarAgregar(edicion)
+            self.ventanaEditar()
+        else:
+            self.ventanaEditarAgregar()
+            self.ventanaAgregar()
+        """Esto va a ir de cara al modelo"""
+
+        
+        
 
         def crear_campo(texto, clave, valor_inicial=""):
-            """Buenisimo seria entender que hace está mierda"""
+            """Funcion de crear campo usada al agregar un producto
+                Es lo ultimo de producto esto
+            """
 
             """======Ventana======"""
             Frame_casilla = tk.Frame(frame_product, bg=color_menu_lateral)
