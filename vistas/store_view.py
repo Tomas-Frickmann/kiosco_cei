@@ -3,23 +3,22 @@ from tkinter import ttk, messagebox
 from tkcalendar import Calendar
 import datetime
 
-from Utilitys.util_config import color_barra_superior, color_cuerpo_principal, color_menu_lateral, color_iconos_turquesa_oscuro, color_fondo_gris
-
+from Utilitys.util_config import *
 class StoreView:
     def __init__(self, panel_principal, controlador):
         self.controlador = controlador
         self.root = self.controlador.root
         
-        # Estilos
+        # Estilos  "#1e293b"
         self.style = ttk.Style()
         self.style.theme_use('clam')
-        self.style.configure("Store.Treeview.Heading", font=('Calibri', 12, 'bold'), background="#1e293b", foreground="white", borderwidth=0, highlightthickness=0, relief="flat")
+        self.style.configure("Store.Treeview.Heading", font=('Calibri', TAMAÑO_LETRA_CAJA, 'bold'), background="#ff0000", foreground="white", borderwidth=0, highlightthickness=0, relief="flat")
         self.style.map("Store.Treeview.Heading", background=[('active', '#334155'), ('!active', '#1e293b')])
 
         self.style.layout("CustomCombobox.TCombobox", [("CustomCombobox.TCombobox", {'side': 'right', 'sticky': ''}),
                             ("CustomCombobox.padding", {'expand': '1', 'children': [("CustomCombobox.focus", {'expand': '1', 'sticky': 'nswe', 'children': [("CustomCombobox.textarea", {'sticky': 'nswe'})]})]})])
         self.style.configure("CustomCombobox.TCombobox", fieldbackground="white", background="white", foreground="black", arrowcolor="black",
-                             selectbackground="white", selectforeground="black", font=('Calibri', 12), borderwidth=0, relief="flat")
+                             selectbackground="white", selectforeground="black", font=('Calibri', TAMAÑO_LETRA_CAJA), borderwidth=0, relief="flat")
         
         self.subcuerpo = tk.Frame(panel_principal, bg=color_barra_superior)
         self.subcuerpo.pack(side=tk.TOP, fill='both', expand=True)
@@ -28,10 +27,11 @@ class StoreView:
         self.frame_encabezado.pack(side=tk.TOP, fill='x', expand=False, anchor='n')
 
         # Botones Superiores (Izquierda)
-        self.cuboizq = tk.Frame(self.frame_encabezado, bg='#1ff11f')
+        self.cuboizq = tk.Frame(self.frame_encabezado, bg="#1e293b")
         self.cuboizq.pack(side=tk.LEFT, fill='both', expand=True)
-        tk.Button(self.cuboizq, text="Cerrar Caja", font=('Calibri', 14), bg="#1e293b", fg="white", command=self.abrir_ventana_cierre_caja).pack(side=tk.TOP, padx=10, pady=10)
-        tk.Button(self.cuboizq, text="Visualizar Ventas", font=('Calibri', 14), bg="#1e293b", fg="white", command=self.abrir_visualizador_ventas).pack(side=tk.TOP, padx=10, pady=10)
+        
+        tk.Button(self.cuboizq, text="Cerrar Caja", font=('Calibri',TAMAÑO_LETRA_CAJA), bg=color_fondo_precio, fg="white", command=self.abrir_ventana_cierre_caja).grid(row=3, column=0,  padx=10, pady=10)
+        tk.Button(self.cuboizq, text="Visualizar Ventas", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_fondo_precio, fg="white", command=self.abrir_visualizador_ventas).grid(row=3, column=1,  padx=10, pady=10)
 
         # Totales (Derecha)
         self.cuboder = tk.Frame(self.frame_encabezado, bg=color_barra_superior)
@@ -49,11 +49,11 @@ class StoreView:
     # DIBUJO DE INTERFAZ PRINCIPAL
     # ==========================================
     def dibujar_panel_precio(self):
-        color_fondo_precio = "#041228"
+        # 1e293b
         self.frame_precio = tk.Frame(self.cuboder, bg="#1e293b")
         self.frame_precio.pack(side=tk.TOP, fill='x', expand=False, anchor='n')
 
-        tk.Label(self.frame_precio, text="TOTAL:", font=('Calibri', 38, 'bold'), bg=color_fondo_precio, fg="white", anchor="w").grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
+        tk.Label(self.frame_precio, text=" TOTAL:", font=('Calibri', 38, 'bold'), bg=color_fondo_precio, fg="white", anchor="w").grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
         self.label_total_val = tk.Label(self.frame_precio, text="$0.00", font=('Calibri', 38, 'bold'), bg=color_fondo_precio, fg="white", anchor="e", width=12)
         self.label_total_val.grid(row=3, column=1, sticky="nsew", padx=5, pady=5)
 
@@ -65,7 +65,7 @@ class StoreView:
         self.frame_entrada_producto.pack(side=tk.TOP, fill='x', padx=10, pady=10)
 
         # Entry Producto
-        self.entry_producto = tk.Entry(self.frame_entrada_producto, font=('Calibri', 12), bg=color_cuerpo_principal)
+        self.entry_producto = tk.Entry(self.frame_entrada_producto, font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_cuerpo_principal)
         self.entry_producto.pack(side=tk.LEFT, fill='x', expand=True, padx=5)
         self.entry_producto.insert(0, "Nombre del producto")
         self.entry_producto.bind("<FocusIn>", self._clear_entry_producto)
@@ -75,14 +75,14 @@ class StoreView:
         self.entry_producto.bind("<Return>", self._select_suggestion_with_enter)
 
         # Listbox Flotante
-        self.suggestion_box_producto = tk.Listbox(self.frame_central, font=('Calibri', 12), height=4)
+        self.suggestion_box_producto = tk.Listbox(self.frame_central, font=('Calibri', TAMAÑO_LETRA_CAJA), height=4)
         self.suggestion_box_producto.place_forget()
         self.suggestion_box_producto.bind("<<ListboxSelect>>", self.select_producto_suggestion)
         self.entry_producto.bind("<FocusOut>", lambda e: self.suggestion_box_producto.place_forget())
         self.suggestion_box_producto.bind("<FocusOut>", lambda e: self.suggestion_box_producto.place_forget())
 
         # Entry Cantidad
-        self.entry_cantidad = tk.Entry(self.frame_entrada_producto, font=('Calibri', 12), bg=color_cuerpo_principal, width=7)
+        self.entry_cantidad = tk.Entry(self.frame_entrada_producto, font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_cuerpo_principal, width=7)
         self.entry_cantidad.pack(side=tk.LEFT, fill='x', expand=True, padx=5)
         self.entry_cantidad.insert(0, "1")
         self.entry_cantidad.bind("<FocusIn>", self._clear_entry_cantidad)
@@ -271,14 +271,14 @@ class StoreView:
 
         frame_inicio = tk.Frame(frame_calendarios, bg=color_menu_lateral, padx=10)
         frame_inicio.pack(side=tk.LEFT, fill='both', expand=True)
-        tk.Label(frame_inicio, text="Fecha inicio:", font=('Calibri', 12), bg=color_menu_lateral, fg="white").pack(pady=5)
+        tk.Label(frame_inicio, text="Fecha inicio:", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").pack(pady=5)
         cal_inicio = Calendar(frame_inicio, selectmode="day", date_pattern="yyyy-mm-dd")
         cal_inicio.pack(pady=5)
         cal_inicio.selection_set(fecha_actual.strftime("%Y-%m-%d"))
 
         frame_fin = tk.Frame(frame_calendarios, bg=color_menu_lateral, padx=10)
         frame_fin.pack(side=tk.LEFT, fill='both', expand=True)
-        tk.Label(frame_fin, text="Fecha fin:", font=('Calibri', 12), bg=color_menu_lateral, fg="white").pack(pady=5)
+        tk.Label(frame_fin, text="Fecha fin:", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").pack(pady=5)
         cal_fin = Calendar(frame_fin, selectmode="day", date_pattern="yyyy-mm-dd")
         cal_fin.pack(pady=5)
         cal_fin.selection_set(fecha_actual.strftime("%Y-%m-%d"))
@@ -286,16 +286,16 @@ class StoreView:
         frame_botones = tk.Frame(ventana, bg=color_menu_lateral, padx=10, pady=10)
         frame_botones.pack(side=tk.TOP, fill='x')
 
-        tk.Label(frame_botones, text="Hora:", font=('Calibri', 12), bg=color_menu_lateral, fg="white").pack(pady=5)
-        entry_hora = tk.Entry(frame_botones, font=('Calibri', 12))
+        tk.Label(frame_botones, text="Hora:", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").pack(pady=5)
+        entry_hora = tk.Entry(frame_botones, font=('Calibri', TAMAÑO_LETRA_CAJA))
         entry_hora.pack(pady=5)
         entry_hora.insert(0, fecha_actual.strftime("%H:%M:%S"))
 
         f_botones_c = tk.Frame(frame_botones, bg=color_menu_lateral)
         f_botones_c.pack(pady=10)
-        tk.Button(f_botones_c, text="Generar Informe", font=('Calibri', 12), bg='#6D8299', fg='white', 
+        tk.Button(f_botones_c, text="Generar Informe", font=('Calibri', TAMAÑO_LETRA_CAJA), bg='#6D8299', fg='white', 
                   command=lambda: self.controlador.generar_informe_caja(cal_inicio.get_date(), cal_fin.get_date(), entry_hora.get(), ventana)).pack(side=tk.LEFT, padx=10)
-        tk.Button(f_botones_c, text="Cancelar", font=('Calibri', 12), bg='#FF6B6B', fg='white', command=ventana.destroy).pack(side=tk.LEFT, padx=10)
+        tk.Button(f_botones_c, text="Cancelar", font=('Calibri', TAMAÑO_LETRA_CAJA), bg='#FF6B6B', fg='white', command=ventana.destroy).pack(side=tk.LEFT, padx=10)
 
     def mostrar_resumen_caja(self, productos_agrupados, fecha_inicio, fecha_fin, hora):
         preview = tk.Toplevel(self.root)
@@ -303,7 +303,7 @@ class StoreView:
         preview.geometry("900x600")
         preview.config(bg=color_menu_lateral)
 
-        tk.Label(preview, text=f"Cierre de Caja - Rango: {fecha_inicio} a {fecha_fin} - Hora: {hora}", font=('Calibri', 14, 'bold'), bg=color_menu_lateral, fg="white").pack(pady=10)
+        tk.Label(preview, text=f"Cierre de Caja - Rango: {fecha_inicio} a {fecha_fin} - Hora: {hora}", font=('Calibri', TAMAÑO_LETRA_CAJA, 'bold'), bg=color_menu_lateral, fg="white").pack(pady=10)
 
         frame_tabla = tk.Frame(preview, bg=color_menu_lateral)
         frame_tabla.pack(fill='both', expand=True, padx=10, pady=10)
@@ -323,7 +323,7 @@ class StoreView:
                 cant_ef + cant_tr, f"${tot_ef + tot_tr:.2f}"
             ))
 
-        tk.Button(preview, text="Cerrar", font=('Calibri', 12), bg='#FF6B6B', fg='white', command=preview.destroy).pack(pady=10)
+        tk.Button(preview, text="Cerrar", font=('Calibri', TAMAÑO_LETRA_CAJA), bg='#FF6B6B', fg='white', command=preview.destroy).pack(pady=10)
 
     def abrir_visualizador_ventas(self):
         ventana = tk.Toplevel(self.root)
@@ -372,7 +372,7 @@ class StoreView:
                 tree_detalle.insert('', 'end', values=d)
 
         tree_ventas.bind('<<TreeviewSelect>>', mostrar_detalle)
-        tk.Button(ventana, text="Cerrar", font=('Calibri', 12), bg='#FF6B6B', fg='white', command=ventana.destroy, width=15).pack(side=tk.BOTTOM, pady=10)
+        tk.Button(ventana, text="Cerrar", font=('Calibri', TAMAÑO_LETRA_CAJA), bg='#FF6B6B', fg='white', command=ventana.destroy, width=15).pack(side=tk.BOTTOM, pady=10)
         
     def abrir_ventana_cobro(self, total_general, imprimir=False):
         ventana = tk.Toplevel(self.root)
@@ -387,21 +387,22 @@ class StoreView:
         tk.Label(ventana, text=f"Total a Cobrar:\n${total_general:.2f}", font=('Calibri', 24, 'bold'), bg=color_menu_lateral, fg="#f7fa3e").pack(pady=20)
 
         # Desplegable de Método
-        tk.Label(ventana, text="Seleccione Método de Pago:", font=('Calibri', 14), bg=color_menu_lateral, fg="white").pack(pady=5)
+        tk.Label(ventana, text="Seleccione Método de Pago:", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").pack(pady=5)
         metodo_var = tk.StringVar(value="Efectivo")
-        combo = ttk.Combobox(ventana, textvariable=metodo_var, values=["Efectivo", "Transferencia", "Mixto"], state="readonly", font=('Calibri', 14))
+        combo = ttk.Combobox(ventana, textvariable=metodo_var, values=["Efectivo", "Transferencia", "Mixto"], state="readonly", font=('Calibri', TAMAÑO_LETRA_CAJA))
         combo.pack(pady=5)
 
         # Cuadros de texto para los montos
         frame_montos = tk.Frame(ventana, bg=color_menu_lateral)
+        
         frame_montos.pack(pady=20)
 
-        tk.Label(frame_montos, text="Monto Efectivo ($):", font=('Calibri', 14), bg=color_menu_lateral, fg="white").grid(row=0, column=0, padx=10, pady=10, sticky="e")
-        entry_efectivo = tk.Entry(frame_montos, font=('Calibri', 14), width=12, justify="center")
+        tk.Label(frame_montos, text="Monto Efectivo ($):", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").grid(row=0, column=0, padx=10, pady=10, sticky="e")
+        entry_efectivo = tk.Entry(frame_montos, font=('Calibri', TAMAÑO_LETRA_CAJA), width=12, justify="center")
         entry_efectivo.grid(row=0, column=1, padx=10, pady=10)
 
-        tk.Label(frame_montos, text="Monto Transf. ($):", font=('Calibri', 14), bg=color_menu_lateral, fg="white").grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        entry_transf = tk.Entry(frame_montos, font=('Calibri', 14), width=12, justify="center")
+        tk.Label(frame_montos, text="Monto Transf. ($):", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").grid(row=1, column=0, padx=10, pady=10, sticky="e")
+        entry_transf = tk.Entry(frame_montos, font=('Calibri', TAMAÑO_LETRA_CAJA), width=12, justify="center")
         entry_transf.grid(row=1, column=1, padx=10, pady=10)
 
         # --- NUEVAS FUNCIONES PARA EL CÁLCULO AUTOMÁTICO (MIXTO) ---
@@ -468,7 +469,7 @@ class StoreView:
         actualizar_montos() # Arranca en Efectivo por defecto
 
         # Botón Confirmar
-        btn_confirmar = tk.Button(ventana, text="Confirmar Pago", font=('Calibri', 14, 'bold'), bg="#13eb33", fg="black", width=20,
+        btn_confirmar = tk.Button(ventana, text="Confirmar Pago", font=('Calibri', TAMAÑO_LETRA_CAJA, 'bold'), bg="#13eb33", fg="black", width=20,
                                   command=lambda: self.controlador.procesar_pago_final(
                                       metodo_var.get(), entry_efectivo.get(), entry_transf.get(), total_general, imprimir, ventana
                                   ))

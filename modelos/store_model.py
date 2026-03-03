@@ -48,7 +48,7 @@ class StoreModel:
             """
             db.execute_query(
                 "Datos/datos.db", query_detalle,
-                (venta_id, prod["producto"], prod["categoria"], prod["subcategoria"], prod["cantidad"], prod["precio_unitario"], prod["total"], metodo_pago)
+                (venta_id, prod[COL_CARRITO_PRODUCTO], prod[COL_CARRITO_CATEGORIA], prod[COL_CARRITO_SUBCATEGORIA], prod[COL_CARRITO_CANTIDAD], prod[COL_CARRITO_PRECIO], prod[COL_CARRITO_TOTAL], metodo_pago)
             )
 
     def obtener_resumen_caja(self, fecha_inicio, fecha_fin):
@@ -70,22 +70,22 @@ class StoreModel:
         query = "SELECT producto, cantidad, precio_unitario, total, metodo_pago FROM detalle_ventas WHERE venta_id = ?"
         return db.execute_query("Datos/datos.db", query, (venta_id,), fetch=True)
     
-    # ==========================================
+  
     # MANEJO DEL CARRITO TEMPORAL (BASE DE DATOS)
-    # ==========================================
+  
 
     def obtener_carrito(self):
         # Eliminamos método de pago del SELECT
-        query = f"SELECT id, {PRODUCTO}, {PRECIO_PRODUCTO}, {CANTIDAD_PRODUCTO}, {TOTAL_PRODUCTO}, {CATEGORIA_PRODUCTO}, {SUBCATEGORIA_PRODUCTO} FROM {TABLA_CARRITO}"
+        query = f"SELECT {COL_CARRITO_ID}, {COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA} FROM {TABLA_CARRITO}"
         return db.execute_query("Datos/datos.db", query, fetch=True)
 
     def actualizar_cantidad_carrito(self, id_item, nueva_cantidad, nuevo_total):
-        query = f"UPDATE {TABLA_CARRITO} SET {CANTIDAD_PRODUCTO} = ?, {TOTAL_PRODUCTO} = ? WHERE id = ?"
+        query = f"UPDATE {TABLA_CARRITO} SET {COL_CARRITO_CANTIDAD} = ?, {COL_CARRITO_TOTAL} = ? WHERE id = ?"
         db.execute_query("Datos/datos.db", query, (nueva_cantidad, nuevo_total, id_item))
 
     def calcular_total_carrito(self):
         # Consulta directa del total, evitando errores de llamadas
-        query = f"SELECT SUM({TOTAL_PRODUCTO}) FROM {TABLA_CARRITO}"
+        query = f"SELECT SUM({COL_CARRITO_TOTAL}) FROM {TABLA_CARRITO}"
         resultado = db.execute_query("Datos/datos.db", query, fetch=True)
         
         if resultado and resultado[0][0] is not None:
@@ -102,7 +102,7 @@ class StoreModel:
     
     def agregar_producto_carrito(self, params):
         # Insertamos solo 7 valores al carrito (sin el método de pago)
-        query = f""" INSERT INTO {TABLA_CARRITO} ({PRODUCTO}, {PRECIO_PRODUCTO}, {CANTIDAD_PRODUCTO}, {TOTAL_PRODUCTO}, {CATEGORIA_PRODUCTO}, {SUBCATEGORIA_PRODUCTO}) VALUES (?,?,?,?,?,?)"""
+        query = f""" INSERT INTO {TABLA_CARRITO} ({COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA}) VALUES (?,?,?,?,?,?)"""
         db.execute_query("Datos/datos.db", query, params)
 
     def carrito_vacio(self):

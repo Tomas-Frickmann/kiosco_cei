@@ -32,10 +32,10 @@ class StoreController:
             self.vista.mostrar_mensaje("error", "Error", "El producto no existe en la base de datos.")
             return
         
-        nombre = prod_db["Nombre"]
-        precio = float(prod_db[PRECIO_PRODUCTO]) # O prod_db[PRECIO_PRODUCTO] según tus constantes
-        stock = prod_db[STOCK_PRODUCTO]
-        control_stock = prod_db[CONTROL_STOCK_PRODUCTO]
+        nombre = prod_db[COL_PROD_NOMBRE]
+        precio = float(prod_db[COL_PROD_PRECIO]) # O prod_db[PRECIO_PRODUCTO] según tus constantes
+        stock = prod_db[COL_PROD_STOCK]
+        control_stock = prod_db[COL_PROD_CONTROL_STOCK]
 
         if control_stock:
             if stock is None:
@@ -68,9 +68,9 @@ class StoreController:
             return
         
         item = carrito_db[index]
-        id_item = item["id"]
-        precio = float(item[PRECIO_PRODUCTO])
-        cantidad_actual = int(item[CANTIDAD_PRODUCTO])
+        id_item = item[COL_CARRITO_ID]
+        precio = float(item[COL_CARRITO_PRECIO])
+        cantidad_actual = int(item[COL_CARRITO_CANTIDAD])
 
         nueva_cantidad = cantidad_actual + 1 if operacion == "+" else cantidad_actual - 1
         
@@ -103,10 +103,10 @@ class StoreController:
         for item in carrito_db:
             
             datos_tabla.append((
-                item[PRODUCTO], 
-                item[PRECIO_PRODUCTO], 
-                item[CANTIDAD_PRODUCTO], 
-                item[TOTAL_PRODUCTO]
+                item[COL_CARRITO_PRODUCTO], 
+                item[COL_CARRITO_PRECIO], 
+                item[COL_CARRITO_CANTIDAD], 
+                item[COL_CARRITO_TOTAL]
             ))
 
         self.vista.refrescar_tabla(datos_tabla)
