@@ -33,6 +33,8 @@ SUBCATEGORIA_PRODUCTO="SubCategoria"
 PROVEDOOR_PRODUCTO="Proveedor"
 IMAGEN_PRODUCTO="Imagen"
 CONTROL_STOCK_PRODUCTO="ControlStock"
+PRODUCTS_COLUMNS = ["id",CODIGO_PRODUCTO,NOMBRE_PRODUCTO,DESCRIPCION_PRODUCTO,PRECIO_PRODUCTO,STOCK_PRODUCTO]
+##No se que queres hacer con id pero bueno lo vemos despues
 
 #Direcciones
 DB_DIRECTORY = "Datos/datos.db"

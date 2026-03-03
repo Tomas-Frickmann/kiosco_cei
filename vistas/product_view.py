@@ -36,8 +36,8 @@ class ProductsPanel():
         label_search.pack(side=tk.LEFT, fill='both', expand=False, padx=5, pady=5)
         self.entry_search = tk.Entry(frame_search, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black")
         self.entry_search.pack(side=tk.LEFT, fill='both', expand=True, padx=5, pady=5)
-        self.entry_search.bind("<KeyRelease>", lambda event: self.search_product())
-        self.entry_search.bind("<Return>", lambda event: self.search_product())
+        self.entry_search.bind("<KeyRelease>", lambda event: self.search_product)
+        self.entry_search.bind("<Return>", lambda event: self.search_product)
 
 
         # Botón para agregar producto
@@ -107,30 +107,22 @@ class ProductsPanel():
         columnas = []
         try:
             productos = self.controlador.consulta_mid("Columnas", None, True)
-            columnas = list(productos[0].keys())
-            print("Columnas:", columnas)
             return productos
         except Exception as e:
             messagebox.showerror("Error", str(e))
             return []
 
     def update_treeview(self):
-        """Entiendo actualiza la tabla de productos
-        TreeView es un Scroll pane o algo similar
-        Insertas por filas, """
-
-        productos = self.get_products()
-
+        """Ya está """
         # Borrar todos los ítems anteriores
         for item in self.tree.get_children():
             self.tree.delete(item)
-
-        # Insertar nuevos productos
-        for prod in productos:
-            controla = "Sí" if prod["controlstock"] else "No"
-            self.tree.insert("", tk.END, values=(
-                prod["id"], prod["codigo"], prod["nombre"], prod["descripcion"], prod["precio"], prod["stock"],controla))
-    
+            
+        productos = self.get_products()
+        for row in productos:
+            values = self.controlador.columnas(row)
+            self.tree.insert("", tk.END, values=(values))
+   
     def search_product(self):
         # Obtener el texto de búsqueda
         search_text = self.entry_search.get().strip()

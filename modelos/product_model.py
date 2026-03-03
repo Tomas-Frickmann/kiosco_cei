@@ -1,10 +1,10 @@
 
-from Utilitys.util_config import DB_DIRECTORY
+from Utilitys.util_config import DB_DIRECTORY, PRODUCTS_COLUMNS
 from Datos import Connect as db
 
 class ProductsModel():
     def __init__(self):
-        pass
+        self.ColumnasProductos = PRODUCTS_COLUMNS
 
 
 

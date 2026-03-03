@@ -22,6 +22,14 @@ class ProductsController():
 
         
         return self.productModel.consultadb(query, param, fetch)
+    def columnas(self, row):
+        controla = "Sí" if row["controlstock"] else "No"
+        categorias = (i for i in self.productModel.ColumnasProductos) #De está manera el controlador no conoce las constantes, las conoce el modelo
+        values = []
+        for x in categorias:
+            values.append(row[x])
+        values.append(controla)
+        return tuple(values)
 
 
 
