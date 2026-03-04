@@ -19,6 +19,8 @@ class ProductsPanel():
         self.check_on = ImageTk.PhotoImage(imagen_redimensionada_on)
         self.check_off = ImageTk.PhotoImage(imagen_redimensionada_off)
 
+        self.check = None #Button de check
+
         # Crear el panel de productos
         self.FrameSearchProduct()
         self.TableProducts()
@@ -113,7 +115,6 @@ class ProductsPanel():
             return []
 
     def update_treeview(self):
-        """Ya está """
         # Borrar todos los ítems anteriores
         for item in self.tree.get_children():
             self.tree.delete(item)
@@ -138,28 +139,22 @@ class ProductsPanel():
                 values = self.controlador.columnas(row)
                 self.tree.insert("", tk.END, values=values)
     
-    def ventanaEditarAgregar(self, edicion=False):
+    def ventanaEditarAgregar(self, edicion=False, id_prod:str = ""):
+
         self.new_window = tk.Toplevel(self.subcuerpo)
-        self.new_window.title("Editar Producto" if edicion else "Agregar Producto")
         self.new_window.geometry("600x600")
         self.new_window.config(bg=color_menu_lateral)
-
         frame_product = tk.Frame(self.new_window, bg=color_menu_lateral)
         frame_product.pack(side=tk.TOP, fill='both', expand=True, pady=20)
 
         self.campos = {}
         self.checks = {}
-        
-    def ventanaAgregar(self):
-        #Hay que crear los campos de texto de TODAS LAS CATEGORIAS
-        pass
 
-    def ventanaEditar(self):
-        #Hay que crear los campos de texto de TODAS LAS CATEGORIAS
-        pass
+        self.new_window.title("Editar Producto" if edicion else "Agregar Producto")
+        self.creacionCampos(self.controlador.consulta_mid("BuscaId",(id_prod,None)),frame_product)
 
-
-    def producto(self,edicion=False, producto_id=None, event = None):
+    def producto(self,edicion=False, event = None):
+        """Está función es llamada por los botones AgregarProducto y EditarProducto """
         ##Edicion
         if edicion:
             selected = self.tree.focus()
@@ -168,86 +163,66 @@ class ProductsPanel():
                 return
             valores = self.tree.item(selected, "values")
             producto_id = valores[0]
-            print(valores)
-            self.ventanaEditarAgregar(edicion)
-            self.ventanaEditar()
         else:
-            self.ventanaEditarAgregar()
-            self.ventanaAgregar()
-        """Esto va a ir de cara al modelo"""
+            producto_id = None
 
-        
-        
-
-        def crear_campo(texto, clave, valor_inicial=""):
-            """Funcion de crear campo usada al agregar un producto
-                Es lo ultimo de producto esto
-            """
-
-            """======Ventana======"""
-            Frame_casilla = tk.Frame(frame_product, bg=color_menu_lateral)
-            Frame_casilla.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
-            label = tk.Label(Frame_casilla, text=texto, font=('Calibri', 12), bg=color_barra_superior, fg="white", width=20)
-            label.pack(side=tk.LEFT, fill='both', expand=False, padx=5, pady=5)
-            entry = tk.Entry(Frame_casilla, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black")
-            """============"""
-
-            """Valor inicial???"""
-
-            if valor_inicial:
-                entry.insert(0, valor_inicial)
-            entry.pack(side=tk.RIGHT, fill='both', expand=True, padx=5, pady=5)
-
-            self.campos[clave] = entry
-
+        self.ventanaEditarAgregar(edicion, producto_id)
 
         # Si hay un ID, cargar los datos
+        print("Producto_id: ", producto_id)
         if producto_id:
-            resultado = self.controlador.consulta_mid("BuscaID", (producto_id,), True)
+            resultado = self.controlador.consulta_mid("BuscaID", ("%"+producto_id+"%",), True)
             if resultado is None:
                 messagebox.showerror("Error", f"No se pudo obtener el producto")
-                return
-            resultado = resultado[0]  # obtener la tupla
-            """Mas tarde resuelvo esto"""
-        # else:
-        #     resultado = [None] * 13  # ajustá al número de columnas de tu tabla
+                return None
+            print("Resultado: ",resultado)  # obtener la tupla
 
-        def safe_str(val):
-            return str(val) if val is not None else ""
+        
+        
+########################################################
+    def crear_campo(self,frame_product: tk.Frame, texto:str, valor_inicial:str =""):
+        """======Ventana ======"""
+        Frame_casilla = tk.Frame(frame_product, bg=color_menu_lateral)
+        Frame_casilla.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+        label = tk.Label(Frame_casilla, text=texto, font=('Calibri', 12), bg=color_barra_superior, fg="white", width=20)
+        label.pack(side=tk.LEFT, fill='both', expand=False, padx=5, pady=5)
+        entry = tk.Entry(Frame_casilla, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black")
+        """============"""
 
-        crear_campo("Código:", "codigo", safe_str(resultado[1]))
-        def validar_codigo(new_value):
-            return len(new_value) <= 6
+        if valor_inicial:
+            entry.insert(0, valor_inicial)
+        entry.pack(side=tk.RIGHT, fill='both', expand=True, padx=5, pady=5)
 
-        vcmd = (self.new_window.register(validar_codigo), '%P')
-        self.campos["codigo"].config(validate="key", validatecommand=vcmd)
+        self.campos[texto.lower()] = entry
 
-        crear_campo("Nombre del Producto:", "nombre", safe_str(resultado[3]))
-        crear_campo("Precio:", "precio", safe_str(resultado[4]))
-        crear_campo("Descripción:", "descripcion", safe_str(resultado[5]))
-        crear_campo("Stock:", "stock", safe_str(resultado[6]))
-        crear_campo("Categoría:", "categoria", safe_str(resultado[8]))
-        crear_campo("Subcategoría:", "subcategoria", safe_str(resultado[9]))
-        crear_campo("Proveedor:", "proveedor", safe_str(resultado[10]))
-        crear_campo("Imagen:", "imagen", safe_str(resultado[11]))
+    def actualizar_color_check(self, event=None):
+        if self.checks["controlstock"].get():
+            self.check.config(
+                bg="#084722", fg="black",
+                activebackground="#084722",
+                highlightbackground="#084722"
+            )
+        else:
+            self.check.config(
+                bg="#5a1d10", fg="white",
+                activebackground="#5a1d10",
+                highlightbackground="#5a1d10"
+            )
 
-        self.checks["controlstock"] = tk.IntVar(value=resultado[12] if producto_id and resultado[12] is not None else 0)
+    """!!!"""
+    def creacionCampos(self, resultado:list, frame_product: tk.Frame):
+        print("Linea 216: ", resultado)
 
-        def actualizar_color_check():
-            if self.checks["controlstock"].get():
-                check.config(
-                    bg="#27ae60", fg="black",
-                    activebackground="#27ae60",
-                    highlightbackground="#27ae60"
-                )
-            else:
-                check.config(
-                    bg="#5a1d10", fg="white",
-                    activebackground="#5a1d10",
-                    highlightbackground="#5a1d10"
-                )
+        columnas = self.controlador.cabeceras_db()
 
-        check = tk.Checkbutton(
+        resultado = [i for i in " "*len(columnas)]
+        
+        for i in range(1,len(columnas)):
+            self.crear_campo(frame_product,f"{columnas[i]}:", resultado[i])
+
+        self.checks["controlstock"] = tk.IntVar(value=resultado[12] if resultado[0] != " " and resultado[-1] is not None else 0)
+
+        self.check = tk.Checkbutton(
             frame_product, text="Control de Stock",
             variable=self.checks["controlstock"],
             image=self.check_off,
@@ -261,17 +236,14 @@ class ProductsPanel():
             activebackground="#27ae60",
             activeforeground="#2ecc71",
             highlightbackground="#5a1d10",  # <- importante
-            command=actualizar_color_check
+            command=self.actualizar_color_check
         )
-        check.pack(pady=10)
-
-        # Llama una vez para que el color inicial sea correcto
-        actualizar_color_check()
+        self.check.pack(pady=10)
 
 
-        # Botón
-        texto_boton = "Guardar Cambios" if producto_id else "Agregar Producto"
-        comando = lambda: self.actualizar_producto(producto_id) if producto_id else self.save_product()
+        # Falta esto nomas
+        texto_boton = "Guardar Cambios" if resultado[0] != " " else "Agregar Producto"
+        comando = lambda: self.controlador.actualizar_producto(resultado[0])
         btn_guardar = tk.Button(frame_product, text=texto_boton, font=('Calibri', 12),
                                 bg=color_menu_cursor_encima, fg="white", command=comando)
         btn_guardar.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
