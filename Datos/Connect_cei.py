@@ -36,6 +36,9 @@ def execute_query(query, params=(), fetch=False):
     
     except sql.Error as e:
         print(f"❌ Error en la base de datos: {e}")
+        conn.commit()
+        cursor.close()
+        conn.close()
         return None
 
 def inicializar_base_de_datos():

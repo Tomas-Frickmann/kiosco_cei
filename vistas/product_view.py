@@ -158,10 +158,9 @@ class ProductsPanel():
 
             self.new_window.title(texto_boton)
             resultado = self.controlador.consulta_mid("BuscaID",(id_prod,), True)
-            self.resultados_editarAgregar = [f"%{i}%" for i in resultado[0][1:]]
-            self.resultados_editarAgregar.append(f"%{resultado[0][0]}%")
-            print(self.resultados_editarAgregar)
-            self.resultados_editarAgregar = tuple(self.resultados_editarAgregar)
+
+            self.edited_id = resultado[0][0] if resultado else id_prod
+
             self.orden_editarAgregar = "Editar"
             
             btn_guardar = tk.Button(self.frame_product, text=texto_boton, font=('Calibri', 12),
@@ -175,20 +174,32 @@ class ProductsPanel():
             texto_boton = "Agregar Producto"
 
             self.orden_editarAgregar = "Agregar"
-            self.resultados_editarAgregar = tuple([" " for _ in range(len(self.controlador.cabeceras_db()))])
 
             self.new_window.title(texto_boton)
 
             btn_guardar = tk.Button(self.frame_product, text=texto_boton, font=('Calibri', 12),
                                     bg=color_menu_cursor_encima, fg="white", command=self.botonEditarAgregar)
-            btn_guardar.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+            btn_guardar.pack(side=tk.BOTTOM, fill='both', expand=False, padx=5, pady=5)
 
             self.creacionCampos(None)
             
     def botonEditarAgregar(self):
-        self.controlador.consulta_mid(self.orden_editarAgregar,self.resultados_editarAgregar)
-        self.update_treeview()
+        """Collect current field values and call controller to persist them."""
+        columnas = self.controlador.cabeceras_db()
+        params = []
+        if self.orden_editarAgregar == "Editar":
+            for col in columnas[1:]:
+                widget = self.campos.get(col.lower())
+                params.append(widget.get() if widget is not None else None)
+            params.append(self.edited_id)
+        else:
+            for col in columnas[1:]:
+                widget = self.campos.get(col.lower())
+                params.append(widget.get() if widget is not None else None)
 
+        self.controlador.consulta_mid(self.orden_editarAgregar, tuple(params))
+        self.update_treeview()
+        self.new_window.destroy()
 
     def cambiar_valor(self):
     # Para modificar un entry 'readonly', hay que pasarlo a 'normal' temporalmente
@@ -254,15 +265,11 @@ class ProductsPanel():
         self.entry.pack(side=tk.RIGHT, fill="x", expand=True, padx=5, pady=5)
         """============"""
 
+        
         if valor_inicial:
             self.entry.insert(0, valor_inicial)
         else:
             self.entry.insert(0, "0")
-        
-
-    
-
-
 
     def actualizar_color_check(self, event=None):
         if self.checks["controlstock"].get():
@@ -288,9 +295,8 @@ class ProductsPanel():
             resultado = resultado[0]
             print("Linea 216: ", resultado)
         except:
-            print("Resultado Excepcion: ", None)
             resultado = [" " for _ in range(len(columnas))]
-
+            print("Resultado Excepcion: ", resultado)
 
         for i in range(1,len(columnas)-1):
             self.crear_campo(f"{columnas[i]}:", resultado[i])

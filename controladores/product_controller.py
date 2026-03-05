@@ -22,18 +22,21 @@ class ProductsController():
         try:
             if query == "Busqueda":
                 print("Param: ", param)
-                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM productos WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
+                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM {self.productModel.tabla} WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
             elif query == "BuscaID":
-                query = f"SELECT * FROM Productos WHERE {self.productModel.ColumnasProductos[0]} = ?"
+                query = f"SELECT * FROM {self.productModel.tabla} WHERE {self.productModel.ColumnasProductos[0]} = ?"
             elif query == "Columnas":
                 #Columnas no es un buen nombre pero no voy a cambiarlo ahora
-                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)} FROM productos"
+                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)} FROM {self.productModel.tabla}"
             elif query == "Agregar":
-                pass
+                cols = self.cabeceras_db()[1:]  # exclude Id for INSERT (assuming autoincrement)
+                cabeceras = self.lista_to_string(cols)
+                placeholders = self.lista_to_placeholders(cols)
+                query = f"INSERT INTO {self.productModel.tabla} ({cabeceras}) VALUES {placeholders}"
+                print(query)
             elif query == "Editar":
                 cabeceras = self.cabeceras_db()
-                query = f"UPDATE productos SET {self.lista_to_string_param(cabeceras[1:])} WHERE {cabeceras[0]}=?"
-                print("Controlador linea 35: \n", query)
+                query = f"UPDATE {self.productModel.tabla} SET {self.lista_to_string_param(cabeceras[1:])} WHERE {cabeceras[0]}=?"
             else:
                 raise Exception("Consulta erronea")
         except Exception as e:
@@ -53,6 +56,12 @@ class ProductsController():
             string += ", " + x + "=?"
         return string + " "
     
+    def lista_to_placeholders(self, lista: list):
+        """Return (?, ?, ...) for INSERT VALUES."""
+        if not lista:
+            return "()"
+        placeholders = ', '.join('?' for _ in lista)
+        return f"({placeholders})"
     def columnas(self, row):
         """Devuelve una fila en base a las cabeceras enviadas"""
         controla = "Sí" if row[self.productModel.ControlStock] else "No"
