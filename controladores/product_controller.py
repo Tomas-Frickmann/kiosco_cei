@@ -23,7 +23,7 @@ class ProductsController():
             print("Param: ", param)
             query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM productos WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
         elif query == "BuscaID":
-            query = "SELECT * FROM productos WHERE Id = ?"
+            query = f"SELECT * FROM productos WHERE {self.productModel.ColumnasProductos[0]} = ?"
         elif query == "Columnas":
             #Columnas no es un buen nombre pero no voy a cambiarlo ahora
             query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)} FROM productos"
@@ -51,7 +51,7 @@ class ProductsController():
     def validar_len_codigo(self, text:str):
         return len(text) <= self.productModel.LongCodigo
 
-    def actualizar_producto(id: str):
+    def actualizar_producto(self, id: str):
         """O llega con id o llega " " """
 
 

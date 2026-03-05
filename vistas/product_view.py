@@ -150,8 +150,14 @@ class ProductsPanel():
         self.campos = {}
         self.checks = {}
 
-        self.new_window.title("Editar Producto" if edicion else "Agregar Producto")
-        self.creacionCampos(self.controlador.consulta_mid("BuscaId",(id_prod,None)),frame_product)
+        if edicion:
+            self.new_window.title("Editar Producto")
+            resultado = self.controlador.consulta_mid("BuscaID",(id_prod,), True)
+            self.creacionCampos(resultado,frame_product)
+        else:
+            self.new_window.title("Agregar Producto")
+            self.creacionCampos(None,frame_product)
+            
 
     def producto(self,edicion=False, event = None):
         """Está función es llamada por los botones AgregarProducto y EditarProducto """
@@ -171,7 +177,7 @@ class ProductsPanel():
         # Si hay un ID, cargar los datos
         print("Producto_id: ", producto_id)
         if producto_id:
-            resultado = self.controlador.consulta_mid("BuscaID", ("%"+producto_id+"%",), True)
+            resultado = self.controlador.consulta_mid("BuscaID", (producto_id,), True)
             if resultado is None:
                 messagebox.showerror("Error", f"No se pudo obtener el producto")
                 return None
@@ -210,16 +216,20 @@ class ProductsPanel():
             )
 
     """!!!"""
-    def creacionCampos(self, resultado:list, frame_product: tk.Frame):
-        print("Linea 216: ", resultado)
+    def creacionCampos(self, resultado, frame_product: tk.Frame):
+
 
         columnas = self.controlador.cabeceras_db()
-
-        resultado = [i for i in " "*len(columnas)]
-        
+        resultado = resultado[0]
+        try:
+            print("Linea 216: ", resultado)
+        except:
+            print("Resultado Excepcion: ", None)
+            resultado = [" " for _ in range(len(columnas))]
         for i in range(1,len(columnas)):
             self.crear_campo(frame_product,f"{columnas[i]}:", resultado[i])
 
+        """!!!!!"""
         self.checks["controlstock"] = tk.IntVar(value=resultado[12] if resultado[0] != " " and resultado[-1] is not None else 0)
 
         self.check = tk.Checkbutton(
@@ -243,7 +253,6 @@ class ProductsPanel():
 
         # Falta esto nomas
         texto_boton = "Guardar Cambios" if resultado[0] != " " else "Agregar Producto"
-        comando = lambda: self.controlador.actualizar_producto(resultado[0])
         btn_guardar = tk.Button(frame_product, text=texto_boton, font=('Calibri', 12),
-                                bg=color_menu_cursor_encima, fg="white", command=comando)
+                                bg=color_menu_cursor_encima, fg="white", command=self.controlador.actualizar_producto(resultado[0]))
         btn_guardar.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
