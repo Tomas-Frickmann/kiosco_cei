@@ -26,6 +26,9 @@ class ProductsPanel():
         self.TableProducts()
 
         self.datos_frame_product=[]
+        
+        self.campos = {}
+        self.checks = {}
 
     def FrameSearchProduct(self):
         panelSearch = tk.Frame(self.subcuerpo, bg=color_menu_lateral,height=10)
@@ -150,9 +153,6 @@ class ProductsPanel():
         self.frame_product.pack(side=tk.TOP, fill='both', expand=True, pady=20)
         # frame_product.grab_set_global()
 
-        self.campos = {}
-        self.checks = {}
-
         if edicion:
             texto_boton = "Guardar Cambios"
 
@@ -189,7 +189,10 @@ class ProductsPanel():
         params = []
         if self.orden_editarAgregar == "Editar":
             for col in columnas[1:]:
+                ##Copilot quiere acceder a campos como si estos fueran los textos pero nunca son usados
+                ##Necesito enlistar los campos de texto
                 widget = self.campos.get(col.lower())
+
                 params.append(widget.get() if widget is not None else None)
             params.append(self.edited_id)
         else:
@@ -197,6 +200,8 @@ class ProductsPanel():
                 widget = self.campos.get(col.lower())
                 params.append(widget.get() if widget is not None else None)
 
+
+        print("Linea 201: ", params)
         self.controlador.consulta_mid(self.orden_editarAgregar, tuple(params))
         self.update_treeview()
         self.new_window.destroy()
@@ -252,7 +257,7 @@ class ProductsPanel():
         btn_cambiar.pack(side=tk.LEFT, padx=5)
 
         # Guardar la referencia
-        self.campos[texto.lower()] = self.entry
+        self.campos[texto[:-1].lower()] = self.entry
     
     def crear_campo(self,texto:str,valor_inicial:str =""):
         """======Ventana ======"""
@@ -270,6 +275,9 @@ class ProductsPanel():
             self.entry.insert(0, valor_inicial)
         else:
             self.entry.insert(0, "0")
+
+        # Guardar la referencia
+        self.campos[texto[:-1].lower()] = self.entry
 
     def actualizar_color_check(self, event=None):
         if self.checks["controlstock"].get():
@@ -293,7 +301,7 @@ class ProductsPanel():
         
         try:
             resultado = resultado[0]
-            print("Linea 216: ", resultado)
+            print("Linea 296: ", resultado)
         except:
             resultado = [" " for _ in range(len(columnas))]
             print("Resultado Excepcion: ", resultado)

@@ -15,7 +15,7 @@ def execute_query(db_path,query, params=(), fetch=False):
     :return: Resultado de la consulta si fetch es True, de lo contrario None.
     """
     try:
-        conn = sql.connect(db_path,check_same_thread=False) 
+        conn = sql.connect(db_path,timeout=3.0) 
         conn.row_factory = sql.Row 
         cursor = conn.cursor()
        
@@ -37,7 +37,7 @@ def execute_query(db_path,query, params=(), fetch=False):
     
 def GetEmpleados():
     #Para leer filas
-    conexion=sql.connect(ruta_base,check_same_thread=False)
+    conexion=sql.connect(ruta_base,timeout=3.0)
     conexion.row_factory = sql.Row 
     cursor=conexion.cursor()
     
@@ -48,7 +48,7 @@ def GetEmpleados():
     return datos
 
 def crear_tabla():
-    conexion=sql.connect(ruta_base,check_same_thread=False)
+    conexion=sql.connect(ruta_base,timeout=3.0)
     cursor = conexion.cursor()
     conexion.row_factory = sql.Row 
     # Creamos la tabla temporal del carrito

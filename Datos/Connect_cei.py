@@ -18,7 +18,7 @@ def execute_query(query, params=(), fetch=False):
         if not os.path.exists("Datos"):
             os.makedirs("Datos")
             
-        conn = sql.connect(DB_PATH, check_same_thread=False)
+        conn = sql.connect(DB_PATH, timeout=3.0)
         conn.row_factory = sql.Row 
         
         cursor = conn.cursor()
@@ -34,11 +34,13 @@ def execute_query(query, params=(), fetch=False):
         conn.close()
         return result
     
-    except sql.Error as e:
-        print(f"❌ Error en la base de datos: {e}")
-        conn.commit()
+    except sql.OperationalError as e:
         cursor.close()
         conn.close()
+        if "database is locked" in str(e):
+            print(f"❌ Database locked: {e}")
+        else:
+            print(f"❌ Database error: {e}")
         return None
 
 def inicializar_base_de_datos():

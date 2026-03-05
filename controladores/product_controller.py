@@ -22,7 +22,7 @@ class ProductsController():
         try:
             if query == "Busqueda":
                 print("Param: ", param)
-                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM {self.productModel.tabla} WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
+                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)} FROM {self.productModel.tabla} WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
             elif query == "BuscaID":
                 query = f"SELECT * FROM {self.productModel.tabla} WHERE {self.productModel.ColumnasProductos[0]} = ?"
             elif query == "Columnas":
@@ -33,15 +33,14 @@ class ProductsController():
                 cabeceras = self.lista_to_string(cols)
                 placeholders = self.lista_to_placeholders(cols)
                 query = f"INSERT INTO {self.productModel.tabla} ({cabeceras}) VALUES {placeholders}"
-                print(query)
             elif query == "Editar":
                 cabeceras = self.cabeceras_db()
                 query = f"UPDATE {self.productModel.tabla} SET {self.lista_to_string_param(cabeceras[1:])} WHERE {cabeceras[0]}=?"
             else:
                 raise Exception("Consulta erronea")
         except Exception as e:
-            print(e.args[0])
-        
+            print("Excepcion en controlador: ",e.args[0])
+        print(query)
         return self.productModel.consultadb(query, param, fetch)
     
     def lista_to_string(self, lista:list):
@@ -62,6 +61,7 @@ class ProductsController():
             return "()"
         placeholders = ', '.join('?' for _ in lista)
         return f"({placeholders})"
+    
     def columnas(self, row):
         """Devuelve una fila en base a las cabeceras enviadas"""
         controla = "Sí" if row[self.productModel.ControlStock] else "No"
@@ -73,14 +73,7 @@ class ProductsController():
         return tuple(values)
     
     def validar_len_codigo(self, text:str):
-        return len(text) <= self.productModel.LongCodigo
-
-    def actualizar_producto(self, id: str, resultados:list = []):
-        """O llega con id o llega " " """
-        print("Controlador linea 56: ", resultados)
-
-
-        pass
+        return len(text) <= self.productModel.LongCodigo 
 
     def cabeceras_db(self):
         return self.productModel.consultadb("SELECT * FROM productos", None)[0].keys()
