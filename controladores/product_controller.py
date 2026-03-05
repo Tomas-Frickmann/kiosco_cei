@@ -19,16 +19,25 @@ class ProductsController():
 
             consultadb devuelve una lista de row, el elemento 0 son las cabeceras
         """
-        if query == "Busqueda":
-            print("Param: ", param)
-            query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM productos WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
-        elif query == "BuscaID":
-            query = f"SELECT * FROM productos WHERE {self.productModel.ColumnasProductos[0]} = ?"
-        elif query == "Columnas":
-            #Columnas no es un buen nombre pero no voy a cambiarlo ahora
-            query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)} FROM productos"
-        else:
-            pass
+        try:
+            if query == "Busqueda":
+                print("Param: ", param)
+                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)}FROM productos WHERE LOWER({self.productModel.Nombre}) LIKE LOWER(?) OR LOWER({self.productModel.Codigo}) LIKE LOWER(?)"
+            elif query == "BuscaID":
+                query = f"SELECT * FROM Productos WHERE {self.productModel.ColumnasProductos[0]} = ?"
+            elif query == "Columnas":
+                #Columnas no es un buen nombre pero no voy a cambiarlo ahora
+                query = f"SELECT {self.lista_to_string(self.productModel.ColumnasProductos)} FROM productos"
+            elif query == "Agregar":
+                pass
+            elif query == "Editar":
+                cabeceras = self.cabeceras_db()
+                query = f"UPDATE productos SET {self.lista_to_string_param(cabeceras[1:])} WHERE {cabeceras[0]}=?"
+                print("Controlador linea 35: \n", query)
+            else:
+                raise Exception("Consulta erronea")
+        except Exception as e:
+            print(e.args[0])
         
         return self.productModel.consultadb(query, param, fetch)
     
@@ -36,6 +45,12 @@ class ProductsController():
         string = lista[0]
         for x in lista[1:]:
             string += ", " + x
+        return string + " "
+    
+    def lista_to_string_param(self, lista:list):
+        string = lista[0] + "=?"
+        for x in lista[1:]:
+            string += ", " + x + "=?"
         return string + " "
     
     def columnas(self, row):
@@ -51,8 +66,9 @@ class ProductsController():
     def validar_len_codigo(self, text:str):
         return len(text) <= self.productModel.LongCodigo
 
-    def actualizar_producto(self, id: str):
+    def actualizar_producto(self, id: str, resultados:list = []):
         """O llega con id o llega " " """
+        print("Controlador linea 56: ", resultados)
 
 
         pass

@@ -25,6 +25,8 @@ class ProductsPanel():
         self.FrameSearchProduct()
         self.TableProducts()
 
+        self.datos_frame_product=[]
+
     def FrameSearchProduct(self):
         panelSearch = tk.Frame(self.subcuerpo, bg=color_menu_lateral,height=10)
         panelSearch.pack(side=tk.TOP, fill='both', expand=False)
@@ -144,20 +146,59 @@ class ProductsPanel():
         self.new_window = tk.Toplevel(self.subcuerpo)
         self.new_window.geometry("600x600")
         self.new_window.config(bg=color_menu_lateral)
-        frame_product = tk.Frame(self.new_window, bg=color_menu_lateral)
-        frame_product.pack(side=tk.TOP, fill='both', expand=True, pady=20)
+        self.frame_product = tk.Frame(self.new_window, bg=color_menu_lateral)
+        self.frame_product.pack(side=tk.TOP, fill='both', expand=True, pady=20)
+        # frame_product.grab_set_global()
 
         self.campos = {}
         self.checks = {}
 
         if edicion:
-            self.new_window.title("Editar Producto")
+            texto_boton = "Guardar Cambios"
+
+            self.new_window.title(texto_boton)
             resultado = self.controlador.consulta_mid("BuscaID",(id_prod,), True)
-            self.creacionCampos(resultado,frame_product)
-        else:
-            self.new_window.title("Agregar Producto")
-            self.creacionCampos(None,frame_product)
+            self.resultados_editarAgregar = [f"%{i}%" for i in resultado[0][1:]]
+            self.resultados_editarAgregar.append(f"%{resultado[0][0]}%")
+            print(self.resultados_editarAgregar)
+            self.resultados_editarAgregar = tuple(self.resultados_editarAgregar)
+            self.orden_editarAgregar = "Editar"
             
+            btn_guardar = tk.Button(self.frame_product, text=texto_boton, font=('Calibri', 12),
+                                    bg=color_menu_cursor_encima, fg="white", command=self.botonEditarAgregar)
+            btn_guardar.pack(side=tk.BOTTOM, fill='both', expand=False, padx=5, pady=5)
+
+            self.creacionCampos(resultado)
+
+            
+        else:
+            texto_boton = "Agregar Producto"
+
+            self.orden_editarAgregar = "Agregar"
+            self.resultados_editarAgregar = tuple([" " for _ in range(len(self.controlador.cabeceras_db()))])
+
+            self.new_window.title(texto_boton)
+
+            btn_guardar = tk.Button(self.frame_product, text=texto_boton, font=('Calibri', 12),
+                                    bg=color_menu_cursor_encima, fg="white", command=self.botonEditarAgregar)
+            btn_guardar.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+
+            self.creacionCampos(None)
+            
+    def botonEditarAgregar(self):
+        self.controlador.consulta_mid(self.orden_editarAgregar,self.resultados_editarAgregar)
+        self.update_treeview()
+
+
+    def cambiar_valor(self):
+    # Para modificar un entry 'readonly', hay que pasarlo a 'normal' temporalmente
+        valor_actual = self.entry.get()
+        nuevo_valor = "1" if valor_actual == "0" else "0"
+        
+        self.entry.config(state='normal') # Habilitar
+        self.entry.delete(0, tk.END)      # Borrar
+        self.entry.insert(0, nuevo_valor) # Insertar nuevo
+        self.entry.config(state='readonly') # Bloquear de nuevo
 
     def producto(self,edicion=False, event = None):
         """Está función es llamada por los botones AgregarProducto y EditarProducto """
@@ -174,32 +215,54 @@ class ProductsPanel():
 
         self.ventanaEditarAgregar(edicion, producto_id)
 
-        # Si hay un ID, cargar los datos
-        print("Producto_id: ", producto_id)
-        if producto_id:
-            resultado = self.controlador.consulta_mid("BuscaID", (producto_id,), True)
-            if resultado is None:
-                messagebox.showerror("Error", f"No se pudo obtener el producto")
-                return None
-            print("Resultado: ",resultado)  # obtener la tupla
-
-        
-        
-########################################################
-    def crear_campo(self,frame_product: tk.Frame, texto:str, valor_inicial:str =""):
+    def crear_campo_control(self, texto:str, valor_inicial:str =""):
         """======Ventana ======"""
-        Frame_casilla = tk.Frame(frame_product, bg=color_menu_lateral)
+        Frame_casilla = tk.Frame(self.frame_product, bg=color_menu_lateral)
         Frame_casilla.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+
         label = tk.Label(Frame_casilla, text=texto, font=('Calibri', 12), bg=color_barra_superior, fg="white", width=20)
         label.pack(side=tk.LEFT, fill='both', expand=False, padx=5, pady=5)
-        entry = tk.Entry(Frame_casilla, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black")
+        self.entry = tk.Entry(Frame_casilla, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black", width=5, justify="center")
         """============"""
 
         if valor_inicial:
-            entry.insert(0, valor_inicial)
-        entry.pack(side=tk.RIGHT, fill='both', expand=True, padx=5, pady=5)
+            self.entry.insert(0, valor_inicial)
+        else:
+            self.entry.insert(0, "0")
+        
 
-        self.campos[texto.lower()] = entry
+        self.entry.config(state="readonly")
+        self.entry.pack(side=tk.LEFT, expand=True, padx=5, pady=5)
+
+        # 4. Botón para cambiar el estado
+        btn_cambiar = tk.Button(Frame_casilla, text="Cambiar", font=('Calibri', 10),
+                                command=self.cambiar_valor, bg="#3498db", fg="white", 
+                                activebackground="#2980b9", cursor="hand2")
+        btn_cambiar.pack(side=tk.LEFT, padx=5)
+
+        # Guardar la referencia
+        self.campos[texto.lower()] = self.entry
+    
+    def crear_campo(self,texto:str,valor_inicial:str =""):
+        """======Ventana ======"""
+        Frame_casilla = tk.Frame(self.frame_product, bg=color_menu_lateral)
+        Frame_casilla.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
+
+        label = tk.Label(Frame_casilla, text=texto, font=('Calibri', 12), bg=color_barra_superior, fg="white", width=20)
+        label.pack(side=tk.LEFT, fill='both', expand=False, padx=5, pady=5)
+        self.entry = tk.Entry(Frame_casilla, font=('Calibri', 12), bg=color_cuerpo_principal, fg="black")
+        self.entry.pack(side=tk.RIGHT, fill="x", expand=True, padx=5, pady=5)
+        """============"""
+
+        if valor_inicial:
+            self.entry.insert(0, valor_inicial)
+        else:
+            self.entry.insert(0, "0")
+        
+
+    
+
+
 
     def actualizar_color_check(self, event=None):
         if self.checks["controlstock"].get():
@@ -216,43 +279,44 @@ class ProductsPanel():
             )
 
     """!!!"""
-    def creacionCampos(self, resultado, frame_product: tk.Frame):
+    def creacionCampos(self, resultado):
 
 
         columnas = self.controlador.cabeceras_db()
-        resultado = resultado[0]
+        
         try:
+            resultado = resultado[0]
             print("Linea 216: ", resultado)
         except:
             print("Resultado Excepcion: ", None)
             resultado = [" " for _ in range(len(columnas))]
-        for i in range(1,len(columnas)):
-            self.crear_campo(frame_product,f"{columnas[i]}:", resultado[i])
+
+
+        for i in range(1,len(columnas)-1):
+            self.crear_campo(f"{columnas[i]}:", resultado[i])
+            self.datos_frame_product.append(resultado[i])
+        self.crear_campo_control(f"{columnas[-1]}:", resultado[-1])
+        self.datos_frame_product.append(resultado[-1])
 
         """!!!!!"""
-        self.checks["controlstock"] = tk.IntVar(value=resultado[12] if resultado[0] != " " and resultado[-1] is not None else 0)
+        # self.checks["controlstock"] = tk.IntVar(value=resultado[-1])
 
-        self.check = tk.Checkbutton(
-            frame_product, text="Control de Stock",
-            variable=self.checks["controlstock"],
-            image=self.check_off,
-            selectimage=self.check_on,
-            onvalue=1, offvalue=0,
-            compound="left",
-            indicatoron=False,
-            font=("Calibri", 14),
-            bg="#5a1d10",
-            fg="white",
-            activebackground="#27ae60",
-            activeforeground="#2ecc71",
-            highlightbackground="#5a1d10",  # <- importante
-            command=self.actualizar_color_check
-        )
-        self.check.pack(pady=10)
+        # self.check = tk.Checkbutton(
+        #     self.frame_product, text="Control de Stock",
+        #     variable=self.checks["controlstock"],
+        #     image=self.check_off,
+        #     selectimage=self.check_on,
+        #     onvalue=1, offvalue=0,
+        #     compound="left",
+        #     indicatoron=False,
+        #     font=("Calibri", 14),
+        #     bg="#5a1d10",
+        #     fg="white",
+        #     activebackground="#2ecc71",
+        #     activeforeground="#2ecc71",
+        #     highlightbackground="#5a1d10",
+        #     command=self.actualizar_color_check
+        # )
+        # self.check.pack(pady=10)
+        # self.actualizar_color_check()
 
-
-        # Falta esto nomas
-        texto_boton = "Guardar Cambios" if resultado[0] != " " else "Agregar Producto"
-        btn_guardar = tk.Button(frame_product, text=texto_boton, font=('Calibri', 12),
-                                bg=color_menu_cursor_encima, fg="white", command=self.controlador.actualizar_producto(resultado[0]))
-        btn_guardar.pack(side=tk.TOP, fill='both', expand=False, padx=5, pady=5)
