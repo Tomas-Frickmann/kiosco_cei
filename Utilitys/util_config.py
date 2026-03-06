@@ -21,6 +21,13 @@ ADD="add"
 
 CONSULTAR="consulta"
 
+EFECTIVO="efectivo"
+TRANSFERENCIA="transferencia"
+MIXTO="mixto"
+CAJA="caja"
+COBRO="cobro"
+CONSULTAR="consulta"
+
 # CONSTANTES DE LA BASE DE DATOS
 
 # TABLA: CARRITO TEMPORAL  ---
@@ -32,6 +39,8 @@ COL_CARRITO_SUBCATEGORIA = "SubCategoria"
 COL_CARRITO_CANTIDAD = "Cantidad"
 COL_CARRITO_PRECIO = "Precio"
 COL_CARRITO_TOTAL = "Total"
+COL_CARRITO_CONTROL_STOCK = "ControlStock"
+COL_CARRITO_LUGAR = "Lugar"
 
 # TABLA: DETALLE DE VENTAS
 TABLA_DETALLE_VENTAS = "detalle_ventas"

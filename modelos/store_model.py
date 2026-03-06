@@ -69,14 +69,15 @@ class StoreModel:
     def obtener_detalle_de_venta(self, venta_id):
         query = "SELECT producto, cantidad, precio_unitario, total, metodo_pago FROM detalle_ventas WHERE venta_id = ?"
         return db.execute_query("Datos/datos.db", query, (venta_id,), fetch=True)
-    
-  
+
+
     # MANEJO DEL CARRITO TEMPORAL (BASE DE DATOS)
   
 
     def obtener_carrito(self):
         # Eliminamos método de pago del SELECT
         query = f"SELECT {COL_CARRITO_ID}, {COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA} FROM {TABLA_CARRITO}"
+        query = f"SELECT * FROM {TABLA_CARRITO}"
         return db.execute_query("Datos/datos.db", query, fetch=True)
 
     def actualizar_cantidad_carrito(self, id_item, nueva_cantidad, nuevo_total):
@@ -87,7 +88,7 @@ class StoreModel:
         # Consulta directa del total, evitando errores de llamadas
         query = f"SELECT SUM({COL_CARRITO_TOTAL}) FROM {TABLA_CARRITO}"
         resultado = db.execute_query("Datos/datos.db", query, fetch=True)
-        
+
         if resultado and resultado[0][0] is not None:
             return float(resultado[0][0])
         return 0.0   
@@ -99,13 +100,13 @@ class StoreModel:
     def vaciar_carrito(self):
         query = f"DELETE FROM {TABLA_CARRITO}"
         db.execute_query("Datos/datos.db", query)
-    
+
     def agregar_producto_carrito(self, params):
         # Insertamos solo 7 valores al carrito (sin el método de pago)
         query = f""" INSERT INTO {TABLA_CARRITO} ({COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA}) VALUES (?,?,?,?,?,?)"""
+        query = f""" INSERT INTO {TABLA_CARRITO} ({COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA}, {COL_CARRITO_CONTROL_STOCK}, {COL_CARRITO_LUGAR}) VALUES (?,?,?,?,?,?,?,?)"""
         db.execute_query("Datos/datos.db", query, params)
 
     def carrito_vacio(self):
         query = f"SELECT COUNT(*) FROM {TABLA_CARRITO}"
         resultado = db.execute_query("Datos/datos.db", query, fetch=True)
-        return resultado[0][0] == 0 # Devuelve True si es 0, False si hay algo

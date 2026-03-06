@@ -15,7 +15,7 @@ def execute_query(db_path,query, params=(), fetch=False):
     :return: Resultado de la consulta si fetch es True, de lo contrario None.
     """
     try:
-        conn = sql.connect(db_path,timeout=3.0) 
+        conn = sql.connect(db_path,check_same_thread=False) 
         conn.row_factory = sql.Row 
         cursor = conn.cursor()
        
@@ -35,12 +35,11 @@ def execute_query(db_path,query, params=(), fetch=False):
         cursor.close()
         conn.close()
         print(f"Error en la base de datos: {e}")
-        print(e.args)
         return None
     
 def GetEmpleados():
     #Para leer filas
-    conexion=sql.connect(ruta_base,timeout=3.0)
+    conexion=sql.connect(ruta_base,check_same_thread=False)
     conexion.row_factory = sql.Row 
     cursor=conexion.cursor()
     
@@ -51,24 +50,23 @@ def GetEmpleados():
     return datos
 
 def crear_tabla():
-    conexion=sql.connect(ruta_base,timeout=3.0)
+    conexion=sql.connect(ruta_base,check_same_thread=False)
     cursor = conexion.cursor()
     conexion.row_factory = sql.Row 
     # Creamos la tabla temporal del carrito
-    query =""""""
-    
-    """
-    CREATE TABLE IF NOT EXISTS carrito_temporal (
+    query = """CREATE TABLE IF NOT EXISTS carrito_temporal (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        producto TEXT NOT NULL,
-        precio_unitario REAL NOT NULL,
-        cantidad REAL NOT NULL,
-        total REAL NOT NULL,
-    );"""
+        Producto TEXT NOT NULL,
+        Categoria TEXT NOT NULL,
+        SubCategoria TEXT NOT NULL,
+        Cantidad REAL NOT NULL,
+        Precio REAL NOT NULL,
+        Total REAL NOT NULL
+        
+    )"""
     cursor.execute(query)
     conexion.commit()
     cursor.close()
     conexion.close()
     print("✅ Tabla 'carrito_temporal' verificada/creada con éxito.")
-
 

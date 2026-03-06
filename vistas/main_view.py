@@ -181,3 +181,6 @@ class MainView:
             self.label_Modo.config(text="Modo: Empleados")
             self.button_on_off.config(image=self.Off)
     
+    def desactiva(self):
+        self.root.unbind_all('<F12>')
+        self.root.unbind_all('<F11>')
