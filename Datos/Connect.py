@@ -31,9 +31,6 @@ def execute_query(db_path,query, params=(), fetch=False):
         conn.close()
         return result
     except sql.Error as e:
-        conn.commit()
-        cursor.close()
-        conn.close()
         print(f"Error en la base de datos: {e}")
         return None
     
@@ -54,19 +51,21 @@ def crear_tabla():
     cursor = conexion.cursor()
     conexion.row_factory = sql.Row 
     # Creamos la tabla temporal del carrito
-    query = """CREATE TABLE IF NOT EXISTS carrito_temporal (
+    query =    """CREATE TABLE IF NOT EXISTS carrito_temporal (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         Producto TEXT NOT NULL,
         Categoria TEXT NOT NULL,
         SubCategoria TEXT NOT NULL,
         Cantidad REAL NOT NULL,
         Precio REAL NOT NULL,
-        Total REAL NOT NULL
+        Total REAL NOT NULL,
+        ControlStock INTEGER NOT NULL,
+        Lugar TEXT 
         
     )"""
     cursor.execute(query)
     conexion.commit()
     cursor.close()
     conexion.close()
-    print("✅ Tabla 'carrito_temporal' verificada/creada con éxito.")
+    
 

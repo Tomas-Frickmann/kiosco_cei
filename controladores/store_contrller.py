@@ -7,10 +7,9 @@ class StoreController:
         self.root = root
         self.main_modelo = main_modelo
         self.store_model = StoreModel()
-
+        
         self.nombre_maquina = self.main_modelo.cargar_configuracion().get("nombre_maquina", "SIN_NOMBRE")
-
-        self.vista = StoreView(main_body, self)
+        
         self.vista = StoreView(root,main_body, self)
         self.actualizar_carrito_vista()
 
@@ -32,9 +31,8 @@ class StoreController:
         if not prod_db:
             self.vista.mostrar_mensaje("error", "Error", "El producto no existe en la base de datos.")
             return
-
+        
         nombre = prod_db[COL_PROD_NOMBRE]
-        precio = float(prod_db[COL_PROD_PRECIO]) # O prod_db[PRECIO_PRODUCTO] según tus constantes
         precio = float(prod_db[COL_PROD_PRECIO]) 
         stock = prod_db[COL_PROD_STOCK]
         control_stock = prod_db[COL_PROD_CONTROL_STOCK]
@@ -48,27 +46,23 @@ class StoreController:
                 return
 
         total = precio * cantidad
-
-        # Estructura EXACTA de 7 parámetros para el carrito_temporal
+        
         
         params = (
             nombre, 
             precio, 
             cantidad, 
             total, 
-            prod_db.get("categoria", ""), 
-            prod_db.get("subcategoria", ""), 
             prod_db[COL_CARRITO_CATEGORIA] or "",
             prod_db[COL_CARRITO_SUBCATEGORIA] or "",
             control_stock,
             self.nombre_maquina
-
+            
         )
         
         self.store_model.agregar_producto_carrito(params)
-
+        
         self.actualizar_carrito_vista()
-        self.vista.limpiar_entradas()
         self.vista.limpiar_entradas(CAJA)
 
     def modificar_cantidad(self, index, operacion):
@@ -76,24 +70,21 @@ class StoreController:
         
         if not carrito_db or index < 0 or index >= len(carrito_db): 
             return
-
+        
         item = carrito_db[index]
         id_item = item[COL_CARRITO_ID]
         precio = float(item[COL_CARRITO_PRECIO])
         cantidad_actual = int(item[COL_CARRITO_CANTIDAD])
-
-        nueva_cantidad = cantidad_actual + 1 if operacion == "+" else cantidad_actual - 1
         prod_db = self.store_model.obtener_producto_exacto(item[COL_CARRITO_PRODUCTO])
         stock = prod_db[COL_PROD_STOCK]
-
-        if nueva_cantidad < 1: return # No permite 0
+        
         
         nueva_cantidad = cantidad_actual + 1 if operacion == "+" else cantidad_actual - 1
         print(dict(item))
         if nueva_cantidad < 1 or (item[COL_CARRITO_CONTROL_STOCK]==1 and nueva_cantidad > stock): return 
 
         nuevo_total = precio * nueva_cantidad
-
+        
         self.store_model.actualizar_cantidad_carrito(id_item, nueva_cantidad, nuevo_total)
         self.actualizar_carrito_vista()
 
@@ -106,7 +97,7 @@ class StoreController:
             if 0 <= index < len(carrito_db):
                 id_item = carrito_db[index]["id"]
                 self.store_model.eliminar_del_carrito(id_item)
-
+                
         self.actualizar_carrito_vista()
 
     def actualizar_carrito_vista(self):
@@ -117,7 +108,7 @@ class StoreController:
 
         datos_tabla = []
         for item in carrito_db:
-
+            
             datos_tabla.append((
                 item[COL_CARRITO_PRODUCTO], 
                 item[COL_CARRITO_PRECIO], 
@@ -126,10 +117,7 @@ class StoreController:
             ))
 
         self.vista.refrescar_tabla(datos_tabla)
-
-        # Efectivo y Transferencia se muestran en 0 porque se definen al final. El Descuento también en 0.
-        # SI tu funcion actualizar_totales_ui pide 4 parámetros, dejalos así:
-        self.vista.actualizar_totales_ui(0.0, 0.0, 0.0, total_general)
+        
         
         self.vista.actualizar_totales_ui(total_general)
 
@@ -137,7 +125,6 @@ class StoreController:
     # FINALIZAR VENTA
     # ==========================================
     def finalizar_venta(self, imprimir=False):
-        # CORREGIDO: "Si está vacío", no "Si NO está vacío"
         
         if self.store_model.carrito_vacio():
             self.vista.mostrar_mensaje("warning", "Caja vacía", "No hay productos para cobrar.")
@@ -148,7 +135,7 @@ class StoreController:
 
         total_general = self.store_model.calcular_total_carrito()
         self.vista.abrir_ventana_cobro(total_general, imprimir)
-
+            
     def procesar_pago_final(self, metodo_pago, monto_efectivo, monto_transf, total_general, imprimir, ventana):
         try:
             efectivo = float(monto_efectivo) if monto_efectivo else 0.0
@@ -162,14 +149,12 @@ class StoreController:
             self.vista.mostrar_mensaje("error", "Error matemático", f"La suma de los pagos (${efectivo + transferencia:.2f}) no coincide con el total de la venta (${total_general:.2f}).")
             return
 
-        # CORREGIDO: Le mandamos solo los 5 argumentos que pide el modelo (sin lista_ventas)
         
         self.store_model.guardar_venta_completa(self.nombre_maquina, efectivo, transferencia, total_general, metodo_pago)
-
+        
         self.store_model.vaciar_carrito()
         self.actualizar_carrito_vista()
 
-        ventana.destroy()
         self.vista.cerrar_y_reactivar(ventana)
 
         if imprimir:
@@ -215,3 +200,4 @@ class StoreController:
 
     def obtener_detalle_venta(self, venta_id):
         detalles = self.store_model.obtener_detalle_de_venta(venta_id)
+        return [tuple(row) for row in detalles] if detalles else []
