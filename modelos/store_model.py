@@ -71,10 +71,12 @@ class StoreModel:
         return db.execute_query("Datos/datos.db", query, (venta_id,), fetch=True)
     
   
+    # MANEJO DEL CARRITO TEMPORAL (BASE DE DATOS)
+  
 
     def obtener_carrito(self):
         # Eliminamos método de pago del SELECT
-        query = f"SELECT * FROM {TABLA_CARRITO}"
+        query = f"SELECT {COL_CARRITO_ID}, {COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA} FROM {TABLA_CARRITO}"
         return db.execute_query("Datos/datos.db", query, fetch=True)
 
     def actualizar_cantidad_carrito(self, id_item, nueva_cantidad, nuevo_total):
@@ -100,7 +102,7 @@ class StoreModel:
     
     def agregar_producto_carrito(self, params):
         # Insertamos solo 7 valores al carrito (sin el método de pago)
-        query = f""" INSERT INTO {TABLA_CARRITO} ({COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA}, {COL_CARRITO_CONTROL_STOCK}, {COL_CARRITO_LUGAR}) VALUES (?,?,?,?,?,?,?,?)"""
+        query = f""" INSERT INTO {TABLA_CARRITO} ({COL_CARRITO_PRODUCTO}, {COL_CARRITO_PRECIO}, {COL_CARRITO_CANTIDAD}, {COL_CARRITO_TOTAL}, {COL_CARRITO_CATEGORIA}, {COL_CARRITO_SUBCATEGORIA}) VALUES (?,?,?,?,?,?)"""
         db.execute_query("Datos/datos.db", query, params)
 
     def carrito_vacio(self):

@@ -4,11 +4,10 @@ from tkcalendar import Calendar
 import datetime
 
 from Utilitys.util_config import *
-# from controladores.store_contrller import StoreController
 class StoreView:
-    def __init__(self, root, panel_principal, controlador):# StoreController):
+    def __init__(self, panel_principal, controlador):
         self.controlador = controlador
-        self.root = root
+        self.root = self.controlador.root
         
         # Estilos  "#1e293b"
         self.style = ttk.Style()
@@ -80,14 +79,13 @@ class StoreView:
         self.suggestion_box_producto.place_forget()
         self.suggestion_box_producto.bind("<<ListboxSelect>>", self.select_producto_suggestion)
         self.entry_producto.bind("<FocusOut>", lambda e: self.suggestion_box_producto.place_forget())
-        
         self.suggestion_box_producto.bind("<FocusOut>", lambda e: self.suggestion_box_producto.place_forget())
 
         # Entry Cantidad
         self.entry_cantidad = tk.Entry(self.frame_entrada_producto, font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_cuerpo_principal, width=7)
         self.entry_cantidad.pack(side=tk.LEFT, fill='x', expand=True, padx=5)
         self.entry_cantidad.insert(0, "1")
-        
+        self.entry_cantidad.bind("<FocusIn>", self._clear_entry_cantidad)
         
         # CORREGIDO: Llamar a enviar_producto sin pasar los parámetros viejos
         self.entry_cantidad.bind("<Return>", lambda e: self.enviar_producto())
@@ -108,7 +106,7 @@ class StoreView:
 
         for col in columnas:
             self.tree.heading(col, text=col, anchor='center' if col != 'Producto' else 'w')
-        self.tree.heading('Total', text='Total', anchor='e')
+        
         self.tree.column('Producto', anchor='w', width=150, stretch=True)
         self.tree.column('Precio Unitario', anchor='center', width=100)
         self.tree.column('Cantidad', anchor='center', width=70)
@@ -136,7 +134,9 @@ class StoreView:
         tk.Button(self.frame_botones, text="Agregar\n(+)", command=lambda: self.controlador.modificar_cantidad(self._get_first_selected_index(), "+"), bg=color_boton, fg="white", width=12).pack(side=tk.LEFT, padx=5, pady=5)
         tk.Button(self.frame_botones, text="Restar\n(-)", command=lambda: self.controlador.modificar_cantidad(self._get_first_selected_index(), "-"), bg=color_boton, fg="white", width=12).pack(side=tk.LEFT, padx=5, pady=5)
        
-
+    # ==========================================
+    # ACTUALIZADORES DESDE EL CONTROLADOR
+    # ==========================================
     def refrescar_tabla(self, lista_ventas):
         for item in self.tree.get_children():
             self.tree.delete(item)
@@ -144,29 +144,25 @@ class StoreView:
             # prod[-1] agarra siempre el Total sin importar si el Controlador manda 4 o 5 datos
             self.tree.insert('', 'end', values=(prod[0], f"${prod[1]:.2f}", prod[2], f"${prod[-1]:.2f}"))
 
-    #  Se usa *args para atrapar cualquier cantidad de valores que envíe el Controlador y sacar solo el último (el Total General)
-    def actualizar_totales_ui(self, total_general):
-       self.label_total_val.config(text=f"${total_general:.2f}")
+    # CORREGIDO: Se usa *args para atrapar cualquier cantidad de valores que envíe el Controlador y sacar solo el último (el Total General)
+    def actualizar_totales_ui(self, *args):
+        if args:
+            total_general = args[-1]
+            self.label_total_val.config(text=f"${total_general:.2f}")
 
-    def limpiar_entradas(self,lugar):
-        if lugar == CAJA:
-            self.entry_producto.delete(0, tk.END)
-            self.entry_cantidad.delete(0, tk.END)
-            self.entry_cantidad.insert(0, "1")
-            self.entry_producto.focus_set()
-        elif lugar == COBRO:
-            self.entry_efectivo.delete(0, tk.END)
-            self.entry_transf.delete(0, tk.END)
-            self.entry_efectivo.insert(0, "0.00")
-            self.entry_transf.insert(0, "0.00")
-
-
+    def limpiar_entradas(self):
+        self.entry_producto.delete(0, tk.END)
+        self.entry_cantidad.delete(0, tk.END)
+        self.entry_cantidad.insert(0, "1")
+        self.entry_producto.focus_set()
 
     def enviar_producto(self):
         # CORREGIDO: Solo se mandan 2 valores (producto y cantidad)
         self.controlador.agregar_producto(self.entry_producto.get(), self.entry_cantidad.get())
 
-   
+    # ==========================================
+    # AYUDANTES (HELPERS) DE LA TABLA Y CAJAS
+    # ==========================================
     def _get_selected_indices(self):
         return [self.tree.index(item) for item in self.tree.selection()]
 
@@ -184,7 +180,9 @@ class StoreView:
             self.entry_cantidad.delete(0, tk.END)
             self._cantidad_cleared = True
 
-
+    # ==========================================
+    # AUTOCOMPLETADO
+    # ==========================================
     def autocomplete_producto_suggestions(self, event):
         if event.keysym in ("Up", "Down", "Return"): return
         
@@ -192,9 +190,7 @@ class StoreView:
         if not text or text == "Nombre del producto":
             self.suggestion_box_producto.place_forget()
             return
-        if self.controlador.validar_producto_rapido(text):
-            self.suggestion_box_producto.place_forget()
-            return
+
         sugerencias = self.controlador.obtener_sugerencias(text)
         self.suggestion_box_producto.delete(0, tk.END)
         
@@ -214,7 +210,6 @@ class StoreView:
             self.entry_producto.delete(0, tk.END)
             self.entry_producto.insert(0, selected)
             self.suggestion_box_producto.place_forget()
-            self.entry_cantidad.focus_set()
 
     def _move_suggestion_down(self, event):
         if self.suggestion_box_producto.size() > 0:
@@ -243,22 +238,20 @@ class StoreView:
     def _select_suggestion_with_enter(self, event):
         if self.suggestion_box_producto.size() > 0 and self.suggestion_box_producto.curselection():
             self.select_producto_suggestion(None)
-            
-            self.suggestion_box_producto.selection_clear(0,tk.END)
+            self.entry_producto.focus_set()
             return "break"
         elif not self.suggestion_box_producto.winfo_ismapped():
             valido = self.controlador.validar_producto_rapido(self.entry_producto.get().strip())
-            
             if not valido:
                 self.entry_producto.focus_set()
                 self.entry_producto.selection_range(0, tk.END)
             else:
                 self.entry_cantidad.focus_set()
-            self.suggestion_box_producto.selection_clear(0,tk.END)
             return "break"
 
-  
-
+    # ==========================================
+    # VENTANAS EMERGENTES (TOPLEVELS)
+    # ==========================================
     def mostrar_mensaje(self, tipo, titulo, mensaje):
         if tipo == "info": messagebox.showinfo(titulo, mensaje)
         elif tipo == "error": messagebox.showerror(titulo, mensaje)
@@ -306,7 +299,7 @@ class StoreView:
 
     def mostrar_resumen_caja(self, productos_agrupados, fecha_inicio, fecha_fin, hora):
         preview = tk.Toplevel(self.root)
-        preview.title("Cierre de Caja")
+        preview.title("Cierre de Caja Resumido")
         preview.geometry("900x600")
         preview.config(bg=color_menu_lateral)
 
@@ -383,15 +376,13 @@ class StoreView:
         
     def abrir_ventana_cobro(self, total_general, imprimir=False):
         ventana = tk.Toplevel(self.root)
-        ventana.transient(self.root)  
-        ventana.grab_set()  
         ventana.title("Finalizar Venta - Cobro")
         ventana.geometry("400x420")
         ventana.config(bg=color_menu_lateral)
         
-        self.desabilita_atajos()
-        ventana.bind( '<Escape>',lambda e: self.cerrar_y_reactivar(ventana))
-        ventana.protocol("WM_DELETE_WINDOW", lambda: self.cerrar_y_reactivar(ventana))
+        # Esto hace que la ventana quede por encima y no puedas tocar el panel de atrás hasta que cobres
+        ventana.grab_set() 
+
         # Título con el Total
         tk.Label(ventana, text=f"Total a Cobrar:\n${total_general:.2f}", font=('Calibri', 24, 'bold'), bg=color_menu_lateral, fg="#f7fa3e").pack(pady=20)
 
@@ -407,93 +398,71 @@ class StoreView:
         frame_montos.pack(pady=20)
 
         tk.Label(frame_montos, text="Monto Efectivo ($):", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").grid(row=0, column=0, padx=10, pady=10, sticky="e")
-        self.entry_efectivo = tk.Entry(frame_montos, font=('Calibri', TAMAÑO_LETRA_CAJA), width=12, justify="center")
-        self.entry_efectivo.grid(row=0, column=1, padx=10, pady=10)
+        entry_efectivo = tk.Entry(frame_montos, font=('Calibri', TAMAÑO_LETRA_CAJA), width=12, justify="center")
+        entry_efectivo.grid(row=0, column=1, padx=10, pady=10)
 
         tk.Label(frame_montos, text="Monto Transf. ($):", font=('Calibri', TAMAÑO_LETRA_CAJA), bg=color_menu_lateral, fg="white").grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        self.entry_transf = tk.Entry(frame_montos, font=('Calibri', TAMAÑO_LETRA_CAJA), width=12, justify="center")
-        self.entry_transf.grid(row=1, column=1, padx=10, pady=10)
-        
-        combo.focus_set() 
+        entry_transf = tk.Entry(frame_montos, font=('Calibri', TAMAÑO_LETRA_CAJA), width=12, justify="center")
+        entry_transf.grid(row=1, column=1, padx=10, pady=10)
 
-        combo.bind('<Return>', lambda e: self.entry_efectivo.focus_set())   
-        combo.bind('m', lambda e: metodo_var.set("Mixto"))
-        combo.bind('e', lambda e: metodo_var.set("Efectivo"))
-        combo.bind('t', lambda e: metodo_var.set("Transferencia"))
-       
-        combo.bind('<Return>', lambda e: self.entry_efectivo.focus_set())   
-        self.entry_efectivo.bind('<Return>', lambda e: self.entry_transf.focus_set())
-        self.entry_efectivo.bind('<FocusIn>', lambda e: self.entry_efectivo.delete(0, tk.END))
-        
         # --- NUEVAS FUNCIONES PARA EL CÁLCULO AUTOMÁTICO (MIXTO) ---
-        def calcular_resto(TIPO):
-                       
+        def calcular_resto_efectivo(event):
+            # Solo hace el cálculo si estamos en Mixto
             if metodo_var.get() == "Mixto":
                 try:
-                    if TIPO == EFECTIVO:
-                        ingresado = float(self.entry_efectivo.get())
-                    else:
-                        ingresado = float(self.entry_transf.get())
-                    
-                    if ingresado >=0 and ingresado <= total_general:
-                        resto = total_general - ingresado
-                        
-                        if TIPO == EFECTIVO:
-                            self.entry_transf.delete(0, tk.END)
-                            self.entry_transf.insert(0, f"{resto:.2f}")
-                        else:
-                            self.entry_efectivo.delete(0, tk.END)
-                            self.entry_efectivo.insert(0, f"{resto:.2f}")
-                    else:
-                        self.mostrar_mensaje("error", "Error", "El monto ingresado no es válido")
-                        
-                        if TIPO == EFECTIVO:
-                            self.entry_efectivo.delete(0, tk.END)
-                            self.entry_transf.delete(0, tk.END)
-                            self.entry_transf.insert(0, f"{0:.2f}")
-                        else:
-                            self.entry_transf.delete(0, tk.END)
-                            self.entry_efectivo.delete(0, tk.END)
-                            self.entry_efectivo.insert(0, f"{0:.2f}")
+                    # Intenta leer lo que escribiste, si está vacío o hay un error, usa 0
+                    ingresado = float(entry_efectivo.get())
                 except ValueError:
                     ingresado = 0.0
                 
+                resto = total_general - ingresado
                 
-                    
+                # Actualiza la cajita de Transferencia con lo que falta
+                entry_transf.delete(0, tk.END)
+                entry_transf.insert(0, f"{resto:.2f}")
+
+        def calcular_resto_transf(event):
+            # Lo mismo, pero a la inversa
+            if metodo_var.get() == "Mixto":
+                try:
+                    ingresado = float(entry_transf.get())
+                except ValueError:
+                    ingresado = 0.0
                 
+                resto = total_general - ingresado
                 
-                
-                
-                
+                # Actualiza la cajita de Efectivo con lo que falta
+                entry_efectivo.delete(0, tk.END)
+                entry_efectivo.insert(0, f"{resto:.2f}")
 
         # Le conectamos los sensores de teclado a las cajitas
-        self.entry_efectivo.bind("<KeyRelease>", lambda e: calcular_resto(EFECTIVO))
-        self.entry_transf.bind("<KeyRelease>", lambda e: calcular_resto(TRANSFERENCIA))
+        entry_efectivo.bind("<KeyRelease>", calcular_resto_efectivo)
+        entry_transf.bind("<KeyRelease>", calcular_resto_transf)
 
         # --- FUNCIÓN MÁGICA PRINCIPAL ---
         def actualizar_montos(*args):
             metodo = metodo_var.get()
-            self.entry_efectivo.config(state='normal')
-            self.entry_transf.config(state='normal')
-            self.entry_efectivo.delete(0, tk.END)
-            self.entry_transf.delete(0, tk.END)
+            entry_efectivo.config(state='normal')
+            entry_transf.config(state='normal')
+            entry_efectivo.delete(0, tk.END)
+            entry_transf.delete(0, tk.END)
 
             if metodo == "Efectivo":
-                self.entry_efectivo.insert(0, f"{total_general:.2f}")
-                self.entry_transf.insert(0, "0.00")
-                self.entry_efectivo.config(state='readonly')
-                self.entry_transf.config(state='readonly')
+                entry_efectivo.insert(0, f"{total_general:.2f}")
+                entry_transf.insert(0, "0.00")
+                entry_efectivo.config(state='readonly')
+                entry_transf.config(state='readonly')
             elif metodo == "Transferencia":
-                self.entry_efectivo.insert(0, "0.00")
-                self.entry_transf.insert(0, f"{total_general:.2f}")
-                self.entry_efectivo.config(state='readonly')
-                self.entry_transf.config(state='readonly')
+                entry_efectivo.insert(0, "0.00")
+                entry_transf.insert(0, f"{total_general:.2f}")
+                entry_efectivo.config(state='readonly')
+                entry_transf.config(state='readonly')
             else:
                 # Si es Mixto, arranca con todo en Transferencia para que empieces a escribir en Efectivo (o viceversa)
-                self.entry_efectivo.insert(0, "0.00")
-                self.entry_transf.insert(0, f"{0:.2f}")
-                self.entry_efectivo.config(state='normal')
-                self.entry_transf.config(state='normal')
+                entry_efectivo.insert(0, "0.00")
+                entry_transf.insert(0, f"{total_general:.2f}")
+                entry_efectivo.config(state='normal')
+                entry_transf.config(state='normal')
 
         # Conecta la función al desplegable
         metodo_var.trace("w", actualizar_montos)
@@ -502,16 +471,6 @@ class StoreView:
         # Botón Confirmar
         btn_confirmar = tk.Button(ventana, text="Confirmar Pago", font=('Calibri', TAMAÑO_LETRA_CAJA, 'bold'), bg="#13eb33", fg="black", width=20,
                                   command=lambda: self.controlador.procesar_pago_final(
-                                      metodo_var.get(), self.entry_efectivo.get(), self.entry_transf.get(), total_general, imprimir, ventana
+                                      metodo_var.get(), entry_efectivo.get(), entry_transf.get(), total_general, imprimir, ventana
                                   ))
         btn_confirmar.pack(pady=10)
-    
-    def desabilita_atajos(self):
-        self.root.unbind_all('<F12>')
-        self.root.unbind_all('<F11>')
-        
-        
-    def cerrar_y_reactivar(self, ventana):
-            self.root.bind_all('<F12>', lambda e: self.controlador.finalizar_venta())
-            self.root.bind_all('<F11>', lambda e: self.controlador.finalizar_venta(imprimir=True))
-            ventana.destroy()
