@@ -44,11 +44,13 @@ class MainController:
             
     def open_statistics_panel(self):
         self.limpiar_panel(self.vista.cuerpo_principal)
+        
         self.controlador_actual=StatisticsController(self.vista.cuerpo_principal, self.modelo)
 
     def limpiar_panel(self,panel):
         for widget in panel.winfo_children():
             widget.destroy()
+        self.vista.desactiva()
 
     def abrir_panel_empleados(self):
         self.limpiar_panel(self.vista.cuerpo_principal)
