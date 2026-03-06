@@ -99,7 +99,7 @@ class ProductsPanel():
         self.tree = ttk.Treeview(frame_tabla, columns=listaCabeceras, show="headings", selectmode="browse",style="Product.Treeview",)
         """TREE"""
         for col in listaCabeceras:
-            self.tree.heading(col, text=col.capitalize(), command=lambda c=col: self.sort_by_column(c, False))
+            self.tree.heading(col, text=col.capitalize())
             self.tree.column(col, width=ancho_columnas.get(col, 100), anchor="center")
 
         # Scrollbar vertical
@@ -333,4 +333,3 @@ class ProductsPanel():
         # )
         # self.check.pack(pady=10)
         # self.actualizar_color_check()
-

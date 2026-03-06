@@ -31,6 +31,9 @@ def execute_query(db_path,query, params=(), fetch=False):
         conn.close()
         return result
     except sql.Error as e:
+        conn.commit()
+        cursor.close()
+        conn.close()
         print(f"Error en la base de datos: {e}")
         print(e.args)
         return None
